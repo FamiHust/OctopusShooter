@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a28132e6abd8614b820e59aa9356098, type: 3}
+  m_Name: SplineRouteConfigDistributeEven
+  m_EditorClassIdentifier: 
+  blockRowPrefab: {fileID: 1420885436481639, guid: 45ca60b6f52b59242ab2125a71afa894, type: 3}
+  blockPrefab: {fileID: 1080545298755357, guid: 111f6aee013cf594e8b985714b9b8cd3, type: 3}
+  moveSpeed: 0.25
+  despawnDistance: 0
+  autoCalculateLength: 1
+  distributeEvenly: 1
+  fixedSpacing: 0.04
+  queueShiftDuration: 0
+  transferDuration: 0.15
+  curveStrength: 0.2
+  tailSeedSpeedBoost: 0.75
+  farDistanceSpeedBoost: 0.1
+  refillSeedClockwiseYaw: 90

@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1842cbefc6cba7d40bb469b2c970ae0f, type: 3}
+  m_Name: BaseShooterCombatConfig
+  m_EditorClassIdentifier: 
+  disappearParticle: {fileID: 1685195247506268, guid: aa7a9f97db1971848bdefb8c5badf9d4, type: 3}
+  jumpDisappearParticle: {fileID: 1024262459035550, guid: 1df5c14cc1329704685f4488f25f3838, type: 3}
+  startJumpVfx: {fileID: 4994997792314849709, guid: 3dd50886582244645be87adb42aa8528, type: 3}
+  jumpEffect: {fileID: 1193137383385508, guid: a6983d326d9ad5d44aadc20687970d9c, type: 3}
+  jumpVfxYOffset: 0.01
+  jumpVfxTowardCameraOffset: 0.06
+  jumpVfxRotationOffsetEuler: {x: 45, y: 90, z: 90}
+  jumpVfxOrderBelowShooter: 1
+  bulletPrefab: {fileID: 1706631759315518, guid: deeed134620a9ff45b916479814ec00f, type: 3}
+  fireRate: 1
+  bulletsPerShot: 1
+  bulletSpreadShotDelay: 0.02
+  seedShotInterval: 0.08
+  bulletSpreadRadius: 0.2
+  rowHandoffDelay: 0.1
+  bulletDecreaseInterval: 0.25
+  bulletDecreaseAmount: 5
+  recoilDistance: 0.3
+  recoilDuration: 0.05
+  deckOutlineDarkenAmount: 0.5
+  deckLandingScaleMultiplier: 1.05
+  jumpScaleEase: 3
+  jumpMoveEase: 1
+  magicStoneVfxPrefab: {fileID: 3928998189374746443, guid: 00bba72dbda252a4eac12e218848cb44, type: 3}
+  magicStoneComboShooterVfxPrefab: {fileID: 7155335147208632822, guid: 97c43495f80a3244fad1301dfafbe252, type: 3}
+  magicStoneComboShooterVfxLocalOffset: {x: 0, y: 0, z: 0}
+  magicStoneComboShooterVfxFadeInDuration: 0.2
+  magicStoneShotStreakThreshold: 50
+  magicStoneComboBreakGapSeconds: 0.5
+  spawnMagicStoneOncePerShootingState: 1

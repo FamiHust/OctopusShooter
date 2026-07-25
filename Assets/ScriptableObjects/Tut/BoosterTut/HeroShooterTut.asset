@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78ea74b321591204ba20702e8bbfc51e, type: 3}
+  m_Name: HeroShooterTut
+  m_EditorClassIdentifier: 
+  tutorialName: Level12
+  tutorialLevel: 30
+  steps:
+  - stepID: 0
+    nextStepDelay: 1
+    targetObjectName: Shooter_ 3_GREEN
+    description: Choose a Shooter to place on the Deck
+    arrowOffset: {x: -0.25, y: 0.3, z: 0.15}
+    arrowRotation: 0
+    arrowLoopDelay: 0.5
+    requireClick: 1
+    enableOverlay: 1
+    waitForMagicStoneProgress: 0
+    requiredMagicStoneCount: 3
+  - stepID: 1
+    nextStepDelay: 0
+    targetObjectName: BtnBooster3
+    description: Use Hero Shooter Booster
+    arrowOffset: {x: -0.2, y: -0.15, z: 0.15}
+    arrowRotation: -30
+    arrowLoopDelay: 0.5
+    requireClick: 1
+    enableOverlay: 1
+    waitForMagicStoneProgress: 0
+    requiredMagicStoneCount: 3
+  - stepID: 2
+    nextStepDelay: 0
+    targetObjectName: Shooter_ 3_ORANGE
+    description: Pick a Shooter to shot with SuperPower
+    arrowOffset: {x: -0.25, y: 0.3, z: 0.15}
+    arrowRotation: 0
+    arrowLoopDelay: 0.5
+    requireClick: 1
+    enableOverlay: 1
+    waitForMagicStoneProgress: 0
+    requiredMagicStoneCount: 3
