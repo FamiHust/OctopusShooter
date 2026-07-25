@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -323,6 +323,65 @@ public class InGameUIManager : MonoBehaviour
         coinText.text = (savedCoins + Mathf.Max(0, pendingMagicStoneCoins)).ToString();
         levelText.text = "Level " +PlayerPrefs.GetInt(Const.player_level_key, 1).ToString();
     }
+
+    // -----------------------------------------------------------------------
+    // Level Navigation
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    /// Chuyển sang level tiếp theo và khởi tạo lại level gameplay.
+    /// </summary>
+    public void NextLevel()
+    {
+        int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
+        int nextLevel = currentLevel + 1;
+        PlayerPrefs.SetInt(Const.player_level_key, nextLevel);
+        PlayerPrefs.Save();
+
+        LoadLevel(nextLevel);
+    }
+
+    /// <summary>
+    /// Quay lại level trước đó (tối thiểu level 1) và khởi tạo lại level gameplay.
+    /// </summary>
+    public void BackLevel()
+    {
+        int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
+        int backLevel = Mathf.Max(1, currentLevel - 1);
+        PlayerPrefs.SetInt(Const.player_level_key, backLevel);
+        PlayerPrefs.Save();
+
+        LoadLevel(backLevel);
+    }
+
+    public void GoToNextLevel() => NextLevel();
+    public void GoToBackLevel() => BackLevel();
+
+    private void LoadLevel(int level)
+    {
+        if (gamePlayController == null)
+        {
+            gamePlayController = GamePlayController.Instance;
+        }
+
+        if (gamePlayController != null)
+        {
+            gamePlayController.InitLevel(level);
+        }
+
+        boosterInstructionPanel?.SetActive(false);
+        ResetLastFourPraiseState(true);
+        KillGameplayCoinFlyTweens();
+
+        AutoUnlockBoostersByCurrentLevel();
+        UpdateBoosterPanelVisibility();
+        UpdateTopUIVisibility();
+        PrepareHardLevelVisualForCurrentLevel();
+        UpdateCoinAndLevelUI(true);
+        UpdateMagicStoneObjectiveUI();
+        RefreshAllButtons();
+    }
+
 
     public bool TryGetCoinFlyTargetScreenPosition(out Vector2 screenPosition)
     {

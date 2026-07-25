@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
@@ -235,6 +235,18 @@ public class LevelColorAssigner
             $"âœ“ Processed: {successCount} levels\nâ€“ Skipped (no shooters): {skipCount} levels", "OK");
     }
 
+    private static Material GetMaterialForSeedColor(SeedColor seedColor)
+    {
+        string matName = seedColor == SeedColor.Hidden ? "M_BlindShooter" : $"M_{seedColor}";
+        string matPath = $"Assets/Material/{matName}.mat";
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(matPath);
+        if (mat == null && seedColor == SeedColor.Hidden)
+        {
+            mat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Material/M_Gray.mat");
+        }
+        return mat;
+    }
+
     private static bool TryAssignShooterColorsToLevelPrefab(string levelName, int[] colorIds)
     {
         string[] prefabGuids = AssetDatabase.FindAssets($"{levelName} t:Prefab",
@@ -243,56 +255,113 @@ public class LevelColorAssigner
         if (prefabGuids.Length == 0) return false;
 
         string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuids[0]);
-        GameObject levelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        GameObject levelPrefab = PrefabUtility.LoadPrefabContents(prefabPath);
         if (levelPrefab == null) return false;
 
-        LevelController lc = levelPrefab.GetComponent<LevelController>();
-        if (lc == null) return false;
-
-        var shooterListField = typeof(LevelController).GetField("shooterList",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (shooterListField == null) return false;
-
-        var shooterList = shooterListField.GetValue(lc) as System.Collections.Generic.List<BaseShooter>;
-        if (shooterList == null || shooterList.Count == 0) return false;
-
-        var targetColorField = typeof(BaseShooter).GetField("targetColor",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var gridItemTypeField = typeof(GridItem).GetField("type",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-        int count = Mathf.Min(shooterList.Count, colorIds.Length);
-        bool changed = false;
-
-        for (int i = 0; i < count; i++)
+        try
         {
-            BaseShooter shooter = shooterList[i];
-            if (shooter == null) continue;
+            LevelController lc = levelPrefab.GetComponent<LevelController>();
+            if (lc == null) return false;
 
-            if (!ColorIDMapping.TryGetValue(colorIds[i], out SeedColor seedColor)) continue;
+            var shooterListField = typeof(LevelController).GetField("shooterList",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (shooterListField == null) return false;
 
-            if (targetColorField != null)
+            var shooterList = shooterListField.GetValue(lc) as System.Collections.Generic.List<BaseShooter>;
+            if (shooterList == null || shooterList.Count == 0) return false;
+
+            var targetColorField = typeof(BaseShooter).GetField("targetColor",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var gridItemTypeField = typeof(GridItem).GetField("type",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var meshField = typeof(BaseShooter).GetField("mesh",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            GridController gc = levelPrefab.GetComponentInChildren<GridController>(true);
+            int colCount = 0;
+            if (gc != null)
             {
-                targetColorField.SetValue(shooter, seedColor);
-                EditorUtility.SetDirty(shooter);
-                changed = true;
+                var colField = typeof(GridController).GetField("col",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (colField != null) colCount = (int)colField.GetValue(gc);
             }
 
-            GridItem gridItem = shooter.GetComponent<GridItem>();
-            if (gridItem != null && gridItemTypeField != null)
+            int count = Mathf.Min(shooterList.Count, colorIds.Length);
+            bool changed = false;
+
+            for (int i = 0; i < count; i++)
             {
-                gridItemTypeField.SetValue(gridItem, GridItemType.Shooter);
-                EditorUtility.SetDirty(gridItem);
+                BaseShooter shooter = shooterList[i];
+                if (shooter == null) continue;
+
+                if (!ColorIDMapping.TryGetValue(colorIds[i], out SeedColor seedColor)) continue;
+
+                string colorStr = seedColor.ToString().ToUpper();
+                string currentName = shooter.gameObject.name;
+                string newShooterName;
+
+                int lastUnderscore = currentName.LastIndexOf('_');
+                if (currentName.StartsWith("Shooter_") && lastUnderscore > 7)
+                {
+                    string prefix = currentName.Substring(0, lastUnderscore);
+                    newShooterName = $"{prefix}_{colorStr}";
+                }
+                else
+                {
+                    newShooterName = $"Shooter_{i}_{colorStr}";
+                }
+
+                if (shooter.gameObject.name != newShooterName)
+                {
+                    shooter.gameObject.name = newShooterName;
+                    EditorUtility.SetDirty(shooter.gameObject);
+                    changed = true;
+                }
+
+                if (targetColorField != null)
+                {
+                    targetColorField.SetValue(shooter, seedColor);
+                    EditorUtility.SetDirty(shooter);
+                    changed = true;
+                }
+
+                // Gán đúng Material tương ứng với seedColor
+                SkinnedMeshRenderer mesh = meshField?.GetValue(shooter) as SkinnedMeshRenderer;
+                if (mesh == null)
+                {
+                    mesh = shooter.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                }
+
+                if (mesh != null)
+                {
+                    Material targetMat = GetMaterialForSeedColor(seedColor);
+                    if (targetMat != null && mesh.sharedMaterial != targetMat)
+                    {
+                        mesh.sharedMaterial = targetMat;
+                        EditorUtility.SetDirty(mesh);
+                        changed = true;
+                    }
+                }
+
+                GridItem gridItem = shooter.GetComponent<GridItem>();
+                if (gridItem != null && gridItemTypeField != null)
+                {
+                    gridItemTypeField.SetValue(gridItem, GridItemType.Shooter);
+                    EditorUtility.SetDirty(gridItem);
+                }
             }
-        }
 
-        if (changed)
+            if (changed)
+            {
+                PrefabUtility.SaveAsPrefabAsset(levelPrefab, prefabPath);
+            }
+
+            return changed;
+        }
+        finally
         {
-            EditorUtility.SetDirty(levelPrefab);
-            ;
+            PrefabUtility.UnloadPrefabContents(levelPrefab);
         }
-
-        return changed;
     }
 
     // â”€â”€ Verify â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

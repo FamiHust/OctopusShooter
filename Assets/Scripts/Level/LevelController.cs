@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using System.Collections.Generic;
@@ -11,6 +11,13 @@ public class LevelController : MonoBehaviour
     [SerializeField] private List<Tunnel> tunnelList;
     [SerializeField] private List<SeedColor> listColor;
     [SerializeField] private GridController gridController;
+    [Header("Conveyor Settings")]
+    [SerializeField] private MeshFilter conveyorMeshFilter;
+    [SerializeField] private List<Mesh> conveyorMeshList = new List<Mesh>();
+    [Header("Map Settings")]
+    [SerializeField] private MeshFilter mapMeshFilter;
+    [SerializeField] private List<Mesh> mapMeshList = new List<Mesh>();
+
     [Header("Init Performance")]
     [SerializeField] private bool batchShooterStateInitOnLowEnd = true;
     [SerializeField, Min(1)] private int shooterStateBatchSizeOnLowEnd = 8;
@@ -39,7 +46,93 @@ public class LevelController : MonoBehaviour
         GetBaseShooterList();
         GetGridController();
         GetSplineController();
+        GetMapMeshFilter();
+        GetConveyorMeshFilter();
+#if UNITY_EDITOR
+        PopulateDefaultMapMeshes();
+        PopulateDefaultConveyorMeshes();
+#endif
     }
+
+    private void GetMapMeshFilter()
+    {
+        if (mapMeshFilter == null)
+        {
+            MeshFilter[] filters = GetComponentsInChildren<MeshFilter>(true);
+            foreach (var mf in filters)
+            {
+                if (mf != null && mf.gameObject != null)
+                {
+                    string gName = mf.gameObject.name;
+                    if (gName.StartsWith("Level_") || (mf.sharedMesh != null && mf.sharedMesh.name.StartsWith("Level_")))
+                    {
+                        mapMeshFilter = mf;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void GetConveyorMeshFilter()
+    {
+        if (conveyorMeshFilter == null)
+        {
+            MeshFilter[] filters = GetComponentsInChildren<MeshFilter>(true);
+            foreach (var mf in filters)
+            {
+                if (mf != null && mf.gameObject != null)
+                {
+                    string gName = mf.gameObject.name.ToLower();
+                    if (gName.Contains("conveyor") || gName.Contains("blockconveyor") || gName.Contains("spline") || gName.Contains("track"))
+                    {
+                        conveyorMeshFilter = mf;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void PopulateDefaultMapMeshes()
+    {
+        if (mapMeshList == null) mapMeshList = new List<Mesh>();
+        if (mapMeshList.Count == 0)
+        {
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:Mesh", new string[] { "Assets/Mesh" });
+            foreach (string guid in guids)
+            {
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                Mesh mesh = UnityEditor.AssetDatabase.LoadAssetAtPath<Mesh>(path);
+                if (mesh != null && mesh.name.StartsWith("Level_"))
+                {
+                    mapMeshList.Add(mesh);
+                }
+            }
+            mapMeshList.Sort((a, b) => string.Compare(a.name, b.name));
+        }
+    }
+
+    private void PopulateDefaultConveyorMeshes()
+    {
+        if (conveyorMeshList == null) conveyorMeshList = new List<Mesh>();
+        if (conveyorMeshList.Count == 0)
+        {
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:Mesh", new string[] { "Assets/Mesh" });
+            foreach (string guid in guids)
+            {
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                Mesh mesh = UnityEditor.AssetDatabase.LoadAssetAtPath<Mesh>(path);
+                if (mesh != null && (mesh.name.StartsWith("Conveyor_") || mesh.name.StartsWith("Track_") || mesh.name.StartsWith("BlockConveyor_") || mesh.name.ToLower().Contains("conveyor")))
+                {
+                    conveyorMeshList.Add(mesh);
+                }
+            }
+            conveyorMeshList.Sort((a, b) => string.Compare(a.name, b.name));
+        }
+    }
+#endif
 
     private void GetBaseShooterList()
     {
