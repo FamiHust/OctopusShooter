@@ -172,15 +172,72 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 478b6b671e53ebf49b54d9bda7c332db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animationComponent: {fileID: 0}
+  animationComponent: {fileID: 111724635991562368}
   maxBulletCount: 100
-  shootPoint: {fileID: 0}
+  shootPoint: {fileID: 4470438697762757}
   bulletDecreaseInterval: 0.25
   bulletDecreaseAmount: 5
-  disappearParticleGO: {fileID: 0}
   mesh: {fileID: 137978719016558403}
-  countTextGO: {fileID: 1808964654146723}
-  targetColor: 0
+  countTextGO: {fileID: 0}
+  targetColor: 2
+  visualTransform: {fileID: 4247116406936740}
+  autoSyncTargetColorFromMaterial: 1
+  materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
+  autoSyncChildrenLayerFromRoot: 1
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 1
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
+  currentState: 0
+  slotBar: {fileID: 0}
+  gridController: {fileID: 0}
+  combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
+  bulletPrefab: {fileID: 0}
+  fireRate: 20
+  bulletsPerShot: 2
+  bulletSpreadShotDelay: 0.02
+  seedShotInterval: 0.08
+  bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
+  rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
+  useSimulatedShootSfx: 1
+  simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
+  disappearParticle: {fileID: 0}
+  jumpDisappearParticle: {fileID: 0}
+  jumpEffect: {fileID: 0}
+  recoilDistance: 0.2
+  recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1972936942588776
 GameObject:
   m_ObjectHideFlags: 0
@@ -224,12 +281,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1972936942588776}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
