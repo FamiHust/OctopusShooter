@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using TMPro;
@@ -273,7 +273,7 @@ public class Tunnel : MonoBehaviour
             shooter.transform.SetParent(gridController.transform);
         }
 
-        shooter.transform.localRotation = transform.localRotation;
+        shooter.transform.localRotation = Quaternion.Euler(30f, 180f, 0f);
         shooter.gameObject.SetActive(true);
 
         return shooter;

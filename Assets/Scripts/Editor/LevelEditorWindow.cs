@@ -69,6 +69,8 @@ public class LevelEditorWindow : EditorWindow
     private MeshFilter m_ConveyorMeshFilter = null;
     private Mesh m_SelectedConveyorMesh = null;
     private List<Mesh> m_ConveyorMeshList = new List<Mesh>();
+    private List<Mesh> m_ShooterMeshList = new List<Mesh>();
+    private Mesh m_SelectedShooterMesh = null;
     private Vector2 m_ColorSummaryScrollPos;
     private Vector2 m_ConveyorMeshScrollPos;
     private Vector2 m_TabScrollPos;
@@ -90,6 +92,7 @@ public class LevelEditorWindow : EditorWindow
     {
         LoadDatabase();
         LoadAvailableMapMeshes();
+        LoadAvailableShooterMeshes();
     }
 
     private void LoadDatabase()
@@ -422,6 +425,24 @@ public class LevelEditorWindow : EditorWindow
                 SavePrefabData(m_PrefabPath);
             }
         }
+
+        GUI.backgroundColor = new Color(0.9f, 0.6f, 0.2f, 1f);
+        if (GUILayout.Button("Mesh Resizer Tool", GUILayout.Height(30)))
+        {
+            LevelMeshResizerTool.OpenWindow();
+        }
+
+        GUI.backgroundColor = new Color(0.2f, 0.8f, 0.6f, 1f);
+        if (GUILayout.Button("Shooter Mesh Tool", GUILayout.Height(30)))
+        {
+            ShooterMeshAssignerTool.OpenWindow();
+        }
+
+        GUI.backgroundColor = new Color(0.3f, 0.75f, 0.95f, 1f);
+        if (GUILayout.Button("Desk Mesh Tool", GUILayout.Height(30)))
+        {
+            DeskMeshAssignerTool.OpenWindow();
+        }
         
         GUI.backgroundColor = Color.white;
         
@@ -579,7 +600,7 @@ public class LevelEditorWindow : EditorWindow
 
         // Draw Tabs selector with horizontal scrolling
         m_TabScrollPos = EditorGUILayout.BeginScrollView(m_TabScrollPos, false, false, GUILayout.Height(48));
-        m_ActiveTab = GUILayout.Toolbar(m_ActiveTab, new string[] { "Cell Inspector", "Conveyor Config", "Map Mesh List", "Conveyor Mesh List" }, tabStyle, GUILayout.MinWidth(560), GUILayout.Height(26));
+        m_ActiveTab = GUILayout.Toolbar(m_ActiveTab, new string[] { "Cell Inspector", "Conveyor Config", "Map Mesh List", "Conveyor Mesh List", "Shooter Mesh List" }, tabStyle, GUILayout.MinWidth(700), GUILayout.Height(26));
         EditorGUILayout.EndScrollView();
 
         GUILayout.Space(10);
@@ -598,6 +619,9 @@ public class LevelEditorWindow : EditorWindow
                 break;
             case 3:
                 DrawConveyorMeshListTab();
+                break;
+            case 4:
+                DrawShooterMeshListTab();
                 break;
         }
 
@@ -765,6 +789,181 @@ public class LevelEditorWindow : EditorWindow
                     m_ConveyorMeshList.Add(mesh);
                 }
             }
+        }
+    }
+
+    private void DrawShooterMeshListTab()
+    {
+        GUILayout.Label("DANH SÁCH SHOOTER MESH CHO LEVEL", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox("Chọn và áp dụng Mesh visual cho các Shooter trong Level Prefab hiện tại.", MessageType.Info);
+
+        GUILayout.Space(10);
+
+        for (int i = 0; i < m_ShooterMeshList.Count; i++)
+        {
+            GUILayout.BeginHorizontal(EditorStyles.helpBox);
+            
+            GUILayout.Label($"#{i + 1}", GUILayout.Width(30));
+            m_ShooterMeshList[i] = (Mesh)EditorGUILayout.ObjectField(m_ShooterMeshList[i], typeof(Mesh), false);
+
+            if (GUILayout.Button("▲", GUILayout.Width(25)))
+            {
+                if (i > 0)
+                {
+                    var tmp = m_ShooterMeshList[i];
+                    m_ShooterMeshList[i] = m_ShooterMeshList[i - 1];
+                    m_ShooterMeshList[i - 1] = tmp;
+                }
+            }
+            if (GUILayout.Button("▼", GUILayout.Width(25)))
+            {
+                if (i < m_ShooterMeshList.Count - 1)
+                {
+                    var tmp = m_ShooterMeshList[i];
+                    m_ShooterMeshList[i] = m_ShooterMeshList[i + 1];
+                    m_ShooterMeshList[i + 1] = tmp;
+                }
+            }
+
+            GUI.backgroundColor = new Color(0.4f, 0.8f, 0.4f, 1f);
+            if (GUILayout.Button("Áp Dụng Cho Level", GUILayout.Width(130)))
+            {
+                if (m_ShooterMeshList[i] != null)
+                {
+                    m_SelectedShooterMesh = m_ShooterMeshList[i];
+                    if (m_Loaded && !string.IsNullOrEmpty(m_PrefabPath))
+                    {
+                        ApplyShooterMeshToCurrentPrefab(m_SelectedShooterMesh);
+                    }
+                    else
+                    {
+                        EditorUtility.DisplayDialog("Thông báo", "Vui lòng load một Level Prefab trước.", "OK");
+                    }
+                }
+            }
+            GUI.backgroundColor = Color.white;
+
+            if (GUILayout.Button("Xóa", GUILayout.Width(45)))
+            {
+                m_ShooterMeshList.RemoveAt(i);
+                break;
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        if (GUILayout.Button("+ Thêm Slot Shooter Mesh"))
+        {
+            m_ShooterMeshList.Add(null);
+        }
+
+        GUILayout.Space(15);
+        GUI.backgroundColor = new Color(0.2f, 0.8f, 0.6f, 1f);
+        if (GUILayout.Button("Mở Tool Gán Mesh Shooter Nâng Cao (Batch / Theo Màu)", GUILayout.Height(35)))
+        {
+            ShooterMeshAssignerTool.OpenWindow();
+        }
+        GUI.backgroundColor = Color.white;
+    }
+
+    private void LoadAvailableShooterMeshes()
+    {
+        if (m_ShooterMeshList == null) m_ShooterMeshList = new List<Mesh>();
+
+        string[] guids = AssetDatabase.FindAssets("t:Mesh", new string[] { "Assets" });
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (mesh != null && !m_ShooterMeshList.Contains(mesh))
+            {
+                string nameLower = mesh.name.ToLower();
+                if (nameLower.Contains("shooter") || nameLower.Contains("character") || nameLower.Contains("seed") || nameLower.Contains("block"))
+                {
+                    m_ShooterMeshList.Add(mesh);
+                }
+            }
+        }
+    }
+
+    private void ApplyShooterMeshToCurrentPrefab(Mesh newMesh)
+    {
+        if (newMesh == null || string.IsNullOrEmpty(m_PrefabPath)) return;
+
+        GameObject root = PrefabUtility.LoadPrefabContents(m_PrefabPath);
+        if (root == null) return;
+
+        try
+        {
+            BaseShooter[] shooters = root.GetComponentsInChildren<BaseShooter>(true);
+            if (shooters == null || shooters.Length == 0)
+            {
+                EditorUtility.DisplayDialog("Thông báo", "Không tìm thấy Shooter nào trong Level Prefab này.", "OK");
+                return;
+            }
+
+            int updatedCount = 0;
+            var meshField = typeof(BaseShooter).GetField("mesh", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            foreach (BaseShooter shooter in shooters)
+            {
+                if (shooter == null) continue;
+
+                bool changed = false;
+
+                SkinnedMeshRenderer smr = null;
+                if (meshField != null)
+                {
+                    smr = meshField.GetValue(shooter) as SkinnedMeshRenderer;
+                }
+                if (smr == null)
+                {
+                    smr = shooter.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                }
+
+                if (smr != null && smr.sharedMesh != newMesh)
+                {
+                    smr.sharedMesh = newMesh;
+                    EditorUtility.SetDirty(smr);
+                    changed = true;
+                }
+
+                MeshFilter mf = shooter.GetComponentInChildren<MeshFilter>(true);
+                if (mf != null && mf.sharedMesh != newMesh)
+                {
+                    mf.sharedMesh = newMesh;
+                    EditorUtility.SetDirty(mf);
+                    changed = true;
+                }
+
+                MeshCollider mc = shooter.GetComponentInChildren<MeshCollider>(true);
+                if (mc != null && mc.sharedMesh != newMesh)
+                {
+                    mc.sharedMesh = newMesh;
+                    EditorUtility.SetDirty(mc);
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    EditorUtility.SetDirty(shooter);
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0)
+            {
+                PrefabUtility.SaveAsPrefabAsset(root, m_PrefabPath);
+                EditorUtility.DisplayDialog("Thành công", $"Đã gán Mesh '{newMesh.name}' cho {updatedCount} Shooter trong Level!", "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Thông báo", "Tất cả các Shooter đã sở hữu Mesh này rồi.", "OK");
+            }
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
         }
     }
 

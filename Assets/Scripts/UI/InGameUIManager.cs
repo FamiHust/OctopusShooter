@@ -1767,6 +1767,11 @@ public class InGameUIManager : MonoBehaviour
         //buyBoosterPopup?.SetActive(false);
     }
 
+    private static bool IsMoveShooterBooster(string boosterId)
+    {
+        return boosterId == Const.BOOSTER_UNLOCKSHOOTER || boosterId == "Spinner" || boosterId == "PickLockedShooter";
+    }
+
     private string GetPopupNameForBooster(string boosterId)
     {
         if (boosterId == Const.BOOSTER_ADDSLOT)
@@ -1774,7 +1779,7 @@ public class InGameUIManager : MonoBehaviour
             return Const.addDeckPopUp;
         }
 
-        if (boosterId == Const.BOOSTER_UNLOCKSHOOTER)
+        if (IsMoveShooterBooster(boosterId))
         {
             return Const.addMoveShooterPopUp;
         }
@@ -1801,7 +1806,9 @@ public class InGameUIManager : MonoBehaviour
             return;
         }
 
-        if (BoosterManager.Instance == null || !BoosterManager.Instance.AddBooster(boosterId, 1))
+        int addAmount = BoosterManager.Instance != null ? BoosterManager.Instance.GetPurchaseAmount(boosterId) : 3;
+
+        if (BoosterManager.Instance == null || !BoosterManager.Instance.AddBooster(boosterId, addAmount))
         {
             AddCoinsBack(safePrice);
             return;
@@ -1902,7 +1909,7 @@ public class InGameUIManager : MonoBehaviour
             }
         }
 
-        if (boosterId == Const.BOOSTER_UNLOCKSHOOTER)
+        if (IsMoveShooterBooster(boosterId))
         {
             AddMoveShooterPopup addMoveShooterPopup = popup.GetComponent<AddMoveShooterPopup>();
             if (addMoveShooterPopup == null)
@@ -1952,7 +1959,7 @@ public class InGameUIManager : MonoBehaviour
             }
         }
 
-        if (boosterId == Const.BOOSTER_UNLOCKSHOOTER)
+        if (IsMoveShooterBooster(boosterId))
         {
             AddMoveShooterPopup addMoveShooterPopup = popup.GetComponent<AddMoveShooterPopup>();
             if (addMoveShooterPopup != null)

@@ -12,6 +12,7 @@ public class IceShooter : BaseShooter
     [SerializeField] private GameObject iceMesh;
     [SerializeField] private float hitCountTweenDuration = 0.08f;
     private int currentHits;
+    [SerializeField] private float hitCountOffsetY = 0f;
     private bool isFrozen;
     private bool isShaking = false;
     private Tween hitTextTween;
@@ -20,6 +21,46 @@ public class IceShooter : BaseShooter
     {
         base.OnValidate();
         AutoAssignVisualReferences();
+        EnsureHitCountDisplayRotation();
+    }
+
+    public void EnsureHitCountDisplayRotation()
+    {
+        if (hitCountDisplay != null)
+        {
+            Vector3 currentEuler = hitCountDisplay.transform.localEulerAngles;
+            if (!Mathf.Approximately(currentEuler.x, 20f) || !Mathf.Approximately(currentEuler.z, 180f))
+            {
+                hitCountDisplay.transform.localEulerAngles = new Vector3(20f, currentEuler.y, 180f);
+            }
+
+            if (hitCountDisplay.rectTransform != null)
+            {
+                Vector2 p = hitCountDisplay.rectTransform.pivot;
+                if (!Mathf.Approximately(p.y, 0.65f))
+                {
+                    hitCountDisplay.rectTransform.pivot = new Vector2(p.x, 0.65f);
+                }
+
+                if (hitCountOffsetY != 0f)
+                {
+                    Vector2 pos = hitCountDisplay.rectTransform.anchoredPosition;
+                    pos.y = hitCountOffsetY;
+                    hitCountDisplay.rectTransform.anchoredPosition = pos;
+                }
+            }
+            else if (hitCountOffsetY != 0f)
+            {
+                Vector3 localPos = hitCountDisplay.transform.localPosition;
+                localPos.y = hitCountOffsetY;
+                hitCountDisplay.transform.localPosition = localPos;
+            }
+        }
+    }
+
+    public void EnsureHitCountDisplayRotationZ()
+    {
+        EnsureHitCountDisplayRotation();
     }
 
     private void AutoAssignVisualReferences()
@@ -69,8 +110,11 @@ public class IceShooter : BaseShooter
                 hitCountDisplay = tmpText;
             }
 
+            EnsureHitCountDisplayRotationZ();
             return;
         }
+
+        EnsureHitCountDisplayRotationZ();
     }
 
     private ParticleSystem FindChildParticleByNameContains(string token)
@@ -122,15 +166,23 @@ public class IceShooter : BaseShooter
     protected override void Start()
     {
         base.Start();
+        EnsureHitCountDisplayRotation();
         isFrozen = hitToUnlock > 0;
         currentHits = 0;
         if (isFrozen)
         {
             SetState(ShooterState.Frozen);
             if (smokeEffect != null) smokeEffect.Play();
+            SetShooterVisualsActive(false);
         }
         UpdateHitDisplay(hitToUnlock, false);
         GameEventHub.Instance.AddListener(GameEventType.OnSeedDestroyed, OnSeedDestroyed);
+    }
+
+    protected override void LateUpdate()
+    {
+        base.LateUpdate();
+        EnsureHitCountDisplayRotation();
     }
 
     protected override void OnDestroy()
@@ -171,11 +223,48 @@ public class IceShooter : BaseShooter
             AudioManager.Instance?.PlaySFX(Const.iceBreakSFX);
         }
         if (iceMesh != null) iceMesh.SetActive(false);
+        SetShooterVisualsActive(true);
         // Đặt về Lock trước để base.CheckShooterState pass guard
         SetState(ShooterState.Lock);
         hitCountDisplay?.gameObject.SetActive(false);
 
         base.CheckShooterState();
+    }
+
+    private void SetShooterVisualsActive(bool active)
+    {
+        Transform visual = GetVisualTransform();
+        if (visual != null && visual != transform && visual.gameObject != gameObject)
+        {
+            visual.gameObject.SetActive(active);
+        }
+
+        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            Renderer r = renderers[i];
+            if (r == null) continue;
+
+            // Không tắt renderer của iceMesh
+            if (iceMesh != null && (r.gameObject == iceMesh || r.transform.IsChildOf(iceMesh.transform)))
+            {
+                continue;
+            }
+
+            // Không tắt renderer của smokeEffect
+            if (smokeEffect != null && r.transform.IsChildOf(smokeEffect.transform))
+            {
+                continue;
+            }
+
+            // Không tắt renderer của iceBreakEffect
+            if (iceBreakEffect != null && r.transform.IsChildOf(iceBreakEffect.transform))
+            {
+                continue;
+            }
+
+            r.enabled = active;
+        }
     }
 
     private void UpdateHitDisplay(int toValue, bool animate)
@@ -202,6 +291,7 @@ public class IceShooter : BaseShooter
     }
     public void PlayFrozenShakeAnimation()
     {
+        AudioManager.Instance?.PlaySFX(Const.popLockSFX);
         if (isShaking) return;
         isShaking = true;
         transform.DOShakePosition(0.35f, strength: new Vector3(0.08f, 0f, 0f), vibrato: 20, randomness: 0, snapping: false, fadeOut: true)

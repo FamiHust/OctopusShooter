@@ -182,6 +182,33 @@ public class BoosterManager : MonoBehaviour
 
     public List<BoosterStrategyConfig> GetAllConfigs() => boosterConfigs;
 
+    public BoosterStrategyConfig GetBoosterConfig(string boosterId)
+    {
+        if (string.IsNullOrEmpty(boosterId)) return null;
+        for (int i = 0; i < boosterConfigs.Count; i++)
+        {
+            var cfg = boosterConfigs[i];
+            if (cfg == null || string.IsNullOrEmpty(cfg.boosterName)) continue;
+            if (cfg.boosterName == boosterId ||
+               ((boosterId == Const.BOOSTER_UNLOCKSHOOTER || boosterId == "Spinner" || boosterId == "PickLockedShooter") &&
+                (cfg.boosterName == Const.BOOSTER_UNLOCKSHOOTER || cfg.boosterName == "Spinner" || cfg.boosterName == "PickLockedShooter")))
+            {
+                return cfg;
+            }
+        }
+        return null;
+    }
+
+    public int GetPurchaseAmount(string boosterId)
+    {
+        var cfg = GetBoosterConfig(boosterId);
+        if (cfg != null && cfg.purchaseAmount > 0)
+        {
+            return cfg.purchaseAmount;
+        }
+        return 3;
+    }
+
     public void SyncUnlockedBoosterInitialCount()
     {
         bool hasChanges = false;

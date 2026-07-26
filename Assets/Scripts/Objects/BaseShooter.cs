@@ -44,8 +44,9 @@ public class BaseShooter : MonoBehaviour
     [SerializeField] private int bulletDecreaseAmount = 5;
     [SerializeField] protected SkinnedMeshRenderer mesh;
     [SerializeField] private TextMeshProUGUI countTextGO;
+    [SerializeField, Range(0.1f, 1f)] private float blockedCountTextAlpha = 0.45f;
     [SerializeField] private SeedColor targetColor;
-    [SerializeField] private Transform visualTransform;
+    [SerializeField] protected Transform visualTransform;
     [SerializeField] private bool autoSyncTargetColorFromMaterial = true;
     [SerializeField] private float materialColorSyncInterval = 0.2f;
     [SerializeField] private bool syncOutlineColorFromBaseWhenInDeck = true;
@@ -63,7 +64,7 @@ public class BaseShooter : MonoBehaviour
     [SerializeField, Min(0.05f)] private float shooterRenderRefreshInterval = 0.2f;
     [SerializeField] private bool optimizeShooterMaterialByState = true;
     [SerializeField] private bool hideSecondaryRenderersWhenNotCombat = true;
-    [SerializeField] private bool simplifyPrimaryMaterialWhenNotCombat = true;
+    [SerializeField] private bool simplifyPrimaryMaterialWhenNotCombat = false;
     [SerializeField] private bool cullShooterWhenOffscreen = true;
     [SerializeField] private float shooterCullViewportPadding = 0.08f;
     [SerializeField] private bool reduceSecondaryRenderersWhenFar = true;
@@ -244,17 +245,28 @@ public class BaseShooter : MonoBehaviour
         CacheShooterRenderers();
         RefreshAdaptiveShooterRendering(true);
         bulletCount = maxBulletCount;
-        countTextGO.gameObject.SetActive(false);
+        if (countTextGO != null)
+        {
+            originTextRotation = countTextGO.transform.rotation;
+        }
+        if (transform.parent == null || transform.parent.GetComponent<Slot>() == null)
+        {
+            transform.localRotation = Quaternion.Euler(20f, 180f, 0f);
+        }
+        if (countTextGO != null)
+        {
+            InitializeCountTextOffset();
+        }
         shooterCollider = GetComponent<Collider>();
         GameEventHub.Instance.AddListener(GameEventType.OnShooterJumpStart, OnJumpStart);
         UpdateBulletCountText();
+        UpdateCountTextVisibilityAndAlpha();
         Transform recoilTransform = ResolveRecoilTransform();
         if (recoilTransform != null)
         {
             // Lưu lại pose local ban đầu của visual để recoil luôn hồi đúng gốc.
             originalVisualLocalPos = recoilTransform.localPosition;
             originalVisualLocalRot = recoilTransform.localRotation;
-            originTextRotation=countTextGO.transform.rotation;
         }
     }
 
@@ -423,6 +435,14 @@ public class BaseShooter : MonoBehaviour
         {
             countTextGO = GetComponentInChildren<TextMeshProUGUI>(true);
         }
+        if (countTextGO != null && countTextGO.rectTransform != null)
+        {
+            Vector2 p = countTextGO.rectTransform.pivot;
+            if (!Mathf.Approximately(p.y, 0.65f))
+            {
+                countTextGO.rectTransform.pivot = new Vector2(p.x, 0.65f);
+            }
+        }
     }
 
     private void GetAnimationComponent()
@@ -463,21 +483,20 @@ public class BaseShooter : MonoBehaviour
         }
     }
 
-    private void GetVisualTransform()
+    protected Transform GetVisualTransform()
     {
         if (visualTransform == null || visualTransform == transform)
         {
             if (mesh != null && mesh.transform != null && mesh.transform != transform)
             {
                 visualTransform = mesh.transform;
-                return;
             }
-
-            if (transform.childCount > 0)
+            else if (transform.childCount > 0)
             {
                 visualTransform = transform.GetChild(0);
             }
-        }   
+        }
+        return visualTransform;
     }
 
     private Transform ResolveRecoilTransform()
@@ -907,7 +926,8 @@ public class BaseShooter : MonoBehaviour
         }
 
         cachedPrimaryOriginalSharedMaterials = cachedPrimaryShooterRenderer.sharedMaterials;
-        if (cachedPrimaryOriginalSharedMaterials != null && cachedPrimaryOriginalSharedMaterials.Length > 0)
+        // Nếu Shooter có từ 2 Material trở lên (ví dụ Material màu và Material mắt), tuyệt đối không được cắt giảm bớt Material làm mất mắt.
+        if (cachedPrimaryOriginalSharedMaterials != null && cachedPrimaryOriginalSharedMaterials.Length == 1)
         {
             cachedPrimaryLowDetailSharedMaterials = new[] { cachedPrimaryOriginalSharedMaterials[0] };
         }
@@ -1429,7 +1449,7 @@ public class BaseShooter : MonoBehaviour
         Vector3 worldPos = transform.position + transform.rotation * countTextOffset;
         countTextGO.transform.position = worldPos;
 
-        // Cập nhật rotation của text để nó quay cùng với shooter
+        // Cập nhật rotation của text luôn hướng chuẩn về phía camera (không bị ngược chữ)
         countTextGO.transform.rotation = originTextRotation;
     }
 
@@ -1441,10 +1461,72 @@ public class BaseShooter : MonoBehaviour
         if (countTextGO == null) return;
         if (isCountTextInitialized) return;
 
+        if (countTextGO.rectTransform != null)
+        {
+            Vector2 p = countTextGO.rectTransform.pivot;
+            if (!Mathf.Approximately(p.y, 0.65f))
+            {
+                countTextGO.rectTransform.pivot = new Vector2(p.x, 0.65f);
+            }
+        }
+
         // Lấy offset từ shooter transform
         countTextOffset = Quaternion.Inverse(transform.rotation) * (countTextGO.transform.position - transform.position);
         countTextRotationOffset = Quaternion.Inverse(transform.rotation) * countTextGO.transform.rotation;
         isCountTextInitialized = true;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem text số lượng đạn có nên được hiển thị hay không dựa trên trạng thái và mechanic.
+    /// </summary>
+    protected virtual bool ShouldShowBulletCountText()
+    {
+        if (countTextGO == null) return false;
+        if (bulletCount <= 0) return false;
+        if (currentState == ShooterState.Lock || currentState == ShooterState.Empty || currentState == ShooterState.Disappear || currentState == ShooterState.Frozen) return false;
+        if (IsMechanicActive()) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Cho phép các lớp kế thừa ghi đè để ẩn text đạn khi mechanic đặc biệt đang kích hoạt.
+    /// </summary>
+    protected virtual bool IsMechanicActive()
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// Cập nhật hiển thị (SetActive) của text đạn.
+    /// Text chỉ hiển thị ở trạng thái có thể hoạt động/di chuyển.
+    /// </summary>
+    public virtual void UpdateCountTextVisibilityAndAlpha()
+    {
+        if (countTextGO == null) return;
+
+        bool shouldShow = ShouldShowBulletCountText();
+        if (!shouldShow)
+        {
+            if (countTextGO.gameObject.activeSelf)
+            {
+                countTextGO.gameObject.SetActive(false);
+            }
+            return;
+        }
+
+        if (!countTextGO.gameObject.activeSelf)
+        {
+            countTextGO.gameObject.SetActive(true);
+        }
+
+        InitializeCountTextOffset();
+
+        Color c = countTextGO.color;
+        if (!Mathf.Approximately(c.a, 1f))
+        {
+            c.a = 1f;
+            countTextGO.color = c;
+        }
     }
 
     public virtual void CheckShooterState(object obj = null)
@@ -1460,6 +1542,7 @@ public class BaseShooter : MonoBehaviour
         {
             SetState(ShooterState.Lock);
         }
+        UpdateCountTextVisibilityAndAlpha();
     }
 
     void FixedUpdate()
@@ -1660,6 +1743,7 @@ public class BaseShooter : MonoBehaviour
         }
 
             RefreshAdaptiveShooterRendering(true);
+            UpdateCountTextVisibilityAndAlpha();
     }
 
     private void StartIdleLogic()
@@ -3169,10 +3253,12 @@ public class BaseShooter : MonoBehaviour
             Ease jumpMoveEase = GetJumpMoveEase();
             Tween jumpScaleTween = transform.DOScale(targetScale, jumpDur).SetEase(jumpScaleEase);
             Tween jumpMoveTween = transform.DOJump(targetPosition + Vector3.up * 0.01f, 0.5f, 1, jumpDur).SetEase(jumpMoveEase);
+            Tween jumpRotateTween = transform.DOLocalRotate(new Vector3(0f, 180f, 0f), jumpDur).SetEase(jumpMoveEase);
             if (runJumpTweenUnscaled)
             {
                 jumpScaleTween.SetUpdate(true);
                 jumpMoveTween.SetUpdate(true);
+                jumpRotateTween.SetUpdate(true);
             }
 
             jumpMoveTween.OnComplete(() =>
@@ -3184,14 +3270,14 @@ public class BaseShooter : MonoBehaviour
                 if (targetParent != null)
                 {
                     transform.SetParent(targetParent.transform, true);
+                    transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                     targetParent.SetShooter(this);
                 }
                 SetState(ShooterState.Idle);
                 slotBar.RegisterShooter(this);
                 GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
-                countTextGO.gameObject.SetActive(true);
                 UpdateBulletCountText();
-                InitializeCountTextOffset(); // Khởi tạo offset khi text hiển thị
+                UpdateCountTextVisibilityAndAlpha();
                 Vector3 jumpVfxPos = GetJumpVfxSpawnPosition();
                 Quaternion jumpVfxRot = transform.rotation * Quaternion.Euler(GetJumpVfxRotationOffsetEuler());
                 OnJumpLandingDeck(jumpVfxPos, jumpVfxRot);
@@ -3524,7 +3610,7 @@ public class BaseShooter : MonoBehaviour
         bool wasPlaying = animationComponent != null && animationComponent.IsPlaying("TouchLock");
         PlayAnimation("TouchLock", false);
 
-        if (!wasPlaying && animationComponent != null && animationComponent.IsPlaying("TouchLock"))
+        if (!wasPlaying)
         {
             AudioManager.Instance?.PlaySFX(Const.popLockSFX);
         }

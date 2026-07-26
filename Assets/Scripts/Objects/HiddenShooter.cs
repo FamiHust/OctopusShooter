@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +6,8 @@ public class HiddenShooter : BaseShooter
 {
     [SerializeField] private GameObject questionMarkTxt;
     [SerializeField] private GameObject questionMarkEffect;
+    [SerializeField] private Material hiddenMaterial;
+    [SerializeField] private float questionMarkOffsetY = 0f;
 
     private Material[] originalMaterials;
     private Material[] hiddenMaterials;
@@ -17,12 +19,88 @@ public class HiddenShooter : BaseShooter
         base.OnEnable();
         EnsureVisualSetup();
         UpdateVisualByCurrentState();
+        EnsureQuestionMarkRotationZ();
     }
 
     protected override void OnValidate()
     {
         base.OnValidate();
         TryAutoAssignQuestionMarkRefs();
+        EnsureQuestionMarkRotationZ();
+#if UNITY_EDITOR
+        TryAutoAssignHiddenMaterial();
+#endif
+    }
+
+#if UNITY_EDITOR
+    private void TryAutoAssignHiddenMaterial()
+    {
+        if (hiddenMaterial == null)
+        {
+            hiddenMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Material/M_BlindShooter.mat");
+        }
+    }
+#endif
+
+    public void EnsureQuestionMarkRotationZ()
+    {
+        if (questionMarkTxt != null)
+        {
+            Vector3 currentEuler = questionMarkTxt.transform.localEulerAngles;
+            if (!Mathf.Approximately(currentEuler.x, 20f) || !Mathf.Approximately(currentEuler.z, 180f))
+            {
+                questionMarkTxt.transform.localEulerAngles = new Vector3(20f, currentEuler.y, 180f);
+            }
+
+            RectTransform rectTransform = questionMarkTxt.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                Vector2 p = rectTransform.pivot;
+                if (!Mathf.Approximately(p.y, 0.65f))
+                {
+                    rectTransform.pivot = new Vector2(p.x, 0.65f);
+                }
+
+                if (questionMarkOffsetY != 0f)
+                {
+                    Vector2 pos = rectTransform.anchoredPosition;
+                    pos.y = questionMarkOffsetY;
+                    rectTransform.anchoredPosition = pos;
+                }
+            }
+            else if (questionMarkOffsetY != 0f)
+            {
+                Vector3 localPos = questionMarkTxt.transform.localPosition;
+                localPos.y = questionMarkOffsetY;
+                questionMarkTxt.transform.localPosition = localPos;
+            }
+
+            DisableQuestionMarkAnimator();
+        }
+    }
+
+    public void DisableQuestionMarkAnimator()
+    {
+        if (questionMarkTxt != null)
+        {
+            Animator[] animators = questionMarkTxt.GetComponentsInChildren<Animator>(true);
+            for (int i = 0; i < animators.Length; i++)
+            {
+                if (animators[i] != null && animators[i].enabled)
+                {
+                    animators[i].enabled = false;
+                }
+            }
+
+            Animation[] animations = questionMarkTxt.GetComponentsInChildren<Animation>(true);
+            for (int i = 0; i < animations.Length; i++)
+            {
+                if (animations[i] != null && animations[i].enabled)
+                {
+                    animations[i].enabled = false;
+                }
+            }
+        }
     }
 
     private void TryAutoAssignQuestionMarkRefs()
@@ -61,6 +139,8 @@ public class HiddenShooter : BaseShooter
                 break;
             }
         }
+
+        EnsureQuestionMarkRotationZ();
     }
 
     protected override void LateUpdate()
@@ -68,6 +148,13 @@ public class HiddenShooter : BaseShooter
         base.LateUpdate();
 
         UpdateVisualByCurrentState();
+        EnsureQuestionMarkRotationZ();
+    }
+
+    protected override bool ShouldShowBulletCountText()
+    {
+        if (isHiddenVisual) return false;
+        return base.ShouldShowBulletCountText();
     }
 
     private void UpdateVisualByCurrentState()
@@ -105,28 +192,24 @@ public class HiddenShooter : BaseShooter
             return;
         }
 
-        // Dùng sharedMaterials để lấy trực tiếp Material từ Prefab (không tạo bản sao)
         originalMaterials = mesh.sharedMaterials;
-
-        // Tạo sẵn mảng Material dùng cho trạng thái ẩn
-        hiddenMaterials = new Material[originalMaterials.Length];
-
-        // Kiểm tra xem Prefab có gắn đủ 2 Material không (Material 0: Gốc, Material 1: Hidden)
-        if (originalMaterials.Length > 1)
+        if (originalMaterials == null || originalMaterials.Length == 0)
         {
-            Material hiddenMat = originalMaterials[1];
+            return;
+        }
 
-            // Phủ Material Hidden lên tất cả các SubMesh
+        hiddenMaterials = new Material[originalMaterials.Length];
+        for (int i = 0; i < originalMaterials.Length; i++)
+        {
+            hiddenMaterials[i] = originalMaterials[i];
+        }
+
+        if (hiddenMaterial != null)
+        {
             for (int i = 0; i < hiddenMaterials.Length; i++)
             {
-                hiddenMaterials[i] = hiddenMat;
+                hiddenMaterials[i] = hiddenMaterial;
             }
-        }
-        else
-        {
-            // Fallback an toàn nếu lỡ quên gắn Material thứ 2 trên Inspector
-            hiddenMaterials = originalMaterials;
-            ;
         }
 
         visualsInitialized = true;
@@ -145,9 +228,11 @@ public class HiddenShooter : BaseShooter
         if (questionMarkTxt != null)
         {
             questionMarkTxt.SetActive(true);
+            EnsureQuestionMarkRotationZ();
         }
 
         isHiddenVisual = true;
+        UpdateCountTextVisibilityAndAlpha();
     }
 
     private void RevealOriginalVisual(bool playRevealEffect = true)
@@ -171,6 +256,7 @@ public class HiddenShooter : BaseShooter
         }
 
         isHiddenVisual = false;
+        UpdateCountTextVisibilityAndAlpha();
     }
 
     private void PlayQuestionMarkEffect()

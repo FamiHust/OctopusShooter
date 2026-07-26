@@ -191,7 +191,7 @@ public class MenuUIManager : MonoBehaviour
             if (i == 0)
             {
                 int displayLevel = currentLevel; // Hiển thị level dựa trên currentLevel
-                levelTexts[i].text = $"{displayLevel}";
+                levelTexts[i].text = $"Level {displayLevel}";
             }
             else
             {

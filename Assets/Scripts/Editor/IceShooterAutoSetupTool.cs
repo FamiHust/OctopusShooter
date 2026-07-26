@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -24,8 +24,102 @@ public static class IceShooterAutoSetupTool
             ", Added IceShooter=" + totalAddedIceShooter +
             ", Removed BaseShooter=" + totalRemovedBaseShooter;
 
-        ;
         EditorUtility.DisplayDialog("Ice Shooter Convert", summary, "OK");
+    }
+
+    [MenuItem("Tools/FlowBlast/Shooter/Fix Hidden & Ice Shooter Text Rotation Z=180")]
+    public static void FixHiddenAndIceShooterTextRotationZ()
+    {
+        int fixedHiddenCount = 0;
+        int fixedIceCount = 0;
+
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (!scene.IsValid() || !scene.isLoaded) continue;
+
+            bool dirty = false;
+            GameObject[] roots = scene.GetRootGameObjects();
+            foreach (GameObject root in roots)
+            {
+                if (root == null) continue;
+
+                HiddenShooter[] hss = root.GetComponentsInChildren<HiddenShooter>(true);
+                foreach (var hs in hss)
+                {
+                    if (hs != null)
+                    {
+                        hs.EnsureQuestionMarkRotationZ();
+                        fixedHiddenCount++;
+                        dirty = true;
+                    }
+                }
+
+                IceShooter[] iss = root.GetComponentsInChildren<IceShooter>(true);
+                foreach (var isShooter in iss)
+                {
+                    if (isShooter != null)
+                    {
+                        isShooter.EnsureHitCountDisplayRotationZ();
+                        fixedIceCount++;
+                        dirty = true;
+                    }
+                }
+            }
+
+            if (dirty)
+            {
+                EditorSceneManager.MarkSceneDirty(scene);
+            }
+        }
+
+        string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab");
+        foreach (string guid in prefabGuids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(path)) continue;
+
+            GameObject prefabRoot = PrefabUtility.LoadPrefabContents(path);
+            if (prefabRoot == null) continue;
+
+            bool prefabChanged = false;
+            try
+            {
+                HiddenShooter[] hss = prefabRoot.GetComponentsInChildren<HiddenShooter>(true);
+                foreach (var hs in hss)
+                {
+                    if (hs != null)
+                    {
+                        hs.EnsureQuestionMarkRotationZ();
+                        fixedHiddenCount++;
+                        prefabChanged = true;
+                    }
+                }
+
+                IceShooter[] iss = prefabRoot.GetComponentsInChildren<IceShooter>(true);
+                foreach (var isShooter in iss)
+                {
+                    if (isShooter != null)
+                    {
+                        isShooter.EnsureHitCountDisplayRotationZ();
+                        fixedIceCount++;
+                        prefabChanged = true;
+                    }
+                }
+
+                if (prefabChanged)
+                {
+                    PrefabUtility.SaveAsPrefabAsset(prefabRoot, path);
+                }
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(prefabRoot);
+            }
+        }
+
+        string msg = $"Fixed Text Z Rotation=180 for:\n- HiddenShooter: {fixedHiddenCount}\n- IceShooter: {fixedIceCount}";
+        EditorUtility.DisplayDialog("Fix Text Rotation Z", msg, "OK");
     }
 
     private static void ProcessLoadedScenes(ref int totalMatched, ref int totalAddedIceShooter, ref int totalRemovedBaseShooter)

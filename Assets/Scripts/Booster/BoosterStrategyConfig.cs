@@ -29,6 +29,9 @@ public abstract class BoosterStrategyConfig : ScriptableObject
     [Header("Shop Settings")]
     [Tooltip("Giá coin để mua booster này")]
     public int coinPrice = 100; // Giá mặc định    
+    [Min(1)]
+    [Tooltip("Số lượng booster nhận được mỗi lần mua qua coin")]
+    public int purchaseAmount = 3;
 
     [Header("Unlock Settings")]
     [Min(1)]

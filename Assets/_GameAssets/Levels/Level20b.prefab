@@ -163,6 +163,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 2
   type: 0
@@ -315,6 +318,10 @@ MonoBehaviour:
   detectLayer:
     serializedVersion: 2
     m_Bits: 128
+  rebuildInterval: 0.08
+  idleRebuildInterval: 0.16
+  rebuildIntervalScale: 0.9
+  overlapBufferSize: 128
   targetsInRange: []
 --- !u!1 &1015427568346652
 GameObject:
@@ -2702,6 +2709,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 4
   type: 2
@@ -2724,13 +2734,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137187891446336353}
   countTextGO: {fileID: 8544133774709428706}
+  blockedCountTextAlpha: 0.45
   targetColor: 9
   visualTransform: {fileID: 4788874268629967}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -2741,15 +2778,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1027325662073002
 GameObject:
   m_ObjectHideFlags: 0
@@ -2825,6 +2869,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 0
   type: 0
@@ -5172,12 +5219,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1035899980013212}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -5300,12 +5347,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1049786932952105}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -7626,7 +7673,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1055847383014850}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -7886,6 +7933,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 6
   type: 2
@@ -7908,13 +7958,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137005406237683945}
   countTextGO: {fileID: 5642855402369421627}
-  targetColor: 0
+  blockedCountTextAlpha: 0.45
+  targetColor: 9
   visualTransform: {fileID: 4003085204034834}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -7925,15 +8002,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1697139368024493}
   questionMarkEffect: {fileID: 1575480389146612}
 --- !u!1 &1090164331209171
@@ -7979,12 +8063,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1090164331209171}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -8091,6 +8175,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 6
   type: 0
@@ -8196,6 +8283,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 0
   type: 2
@@ -8218,13 +8308,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137318223029800504}
   countTextGO: {fileID: 6150395091523618053}
-  targetColor: 0
+  blockedCountTextAlpha: 0.45
+  targetColor: 5
   visualTransform: {fileID: 4247218288926622}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -8235,15 +8352,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1986689621824403}
   questionMarkEffect: {fileID: 1055847383014850}
 --- !u!1 &1117258439855533
@@ -8282,7 +8406,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222551634739199221
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8333,7 +8457,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -8521,6 +8645,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 1
   type: 0
@@ -8752,6 +8879,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 1
   type: 0
@@ -8826,6 +8956,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 5
   type: 2
@@ -8848,13 +8981,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137112810118999304}
   countTextGO: {fileID: 914697012879460299}
+  blockedCountTextAlpha: 0.45
   targetColor: 3
   visualTransform: {fileID: 4701875136029254}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -8865,15 +9025,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1358550042316343}
   questionMarkEffect: {fileID: 1369702376439926}
 --- !u!1 &1155695647726647
@@ -11229,7 +11396,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222628255432589586
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11280,7 +11447,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -11432,6 +11599,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 3
   type: 0
@@ -11537,6 +11707,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 4
   type: 2
@@ -11559,13 +11732,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137507494220942843}
   countTextGO: {fileID: 6663759628403739873}
-  targetColor: 0
+  blockedCountTextAlpha: 0.45
+  targetColor: 5
   visualTransform: {fileID: 4007710348660727}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -11576,15 +11776,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1120442964502875}
   questionMarkEffect: {fileID: 1519973290104670}
 --- !u!1 &1183108548591782
@@ -11754,6 +11961,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 3
   type: 0
@@ -11832,7 +12042,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222504146746430997
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11883,7 +12093,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -12099,6 +12309,28 @@ MonoBehaviour:
   autoCalculateLength: 1
   distributeEvenly: 1
   fixedSpacing: 2
+  optimizeSideSeedVisuals: 1
+  sideAlwaysVisibleFrontRows: 2
+  sideVisualRefreshInterval: 0.2
+  sideViewportPadding: 0.15
+  strictViewportSeedCulling: 1
+  optimizeMainSeedVisuals: 1
+  mainVisualRefreshInterval: 0.12
+  maxRenderedRowsMainRoute: 10
+  maxRenderedRowsSideRoute: 6
+  optimizeRowRendererCulling: 1
+  optimizeRowRendererSettings: 1
+  allowPbrProbeLightingForRows: 1
+  disableRowShadowCasting: 1
+  disableRowReceiveShadows: 1
+  disableRowLightProbes: 0
+  disableRowReflectionProbes: 0
+  deferRowSpawnOnLowEnd: 1
+  forceDeferredRowSpawn: 0
+  deferredSpawnRowsPerFrame: 10
+  deferredSpawnMinRowsThreshold: 30
+  deferredSpawnLowEndSystemMemoryMb: 3000
+  deferredSpawnLowEndProcessorCount: 4
 --- !u!1 &1203292963340509
 GameObject:
   m_ObjectHideFlags: 0
@@ -14556,6 +14788,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 2
   type: 2
@@ -14578,13 +14813,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137022934551135670}
   countTextGO: {fileID: 9195603177315471557}
-  targetColor: 0
+  blockedCountTextAlpha: 0.45
+  targetColor: 9
   visualTransform: {fileID: 4279126592843325}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -14595,15 +14857,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1938457813570390}
   questionMarkEffect: {fileID: 1745306911078366}
 --- !u!1 &1223535231144790
@@ -14680,12 +14949,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1233009886044783}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -15003,6 +15272,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 0
   type: 0
@@ -15111,6 +15383,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 4
   type: 0
@@ -15196,12 +15471,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1270927042372993}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -15286,7 +15561,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222104657267406093
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -15337,7 +15612,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -15466,12 +15741,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1282485113165055}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -15564,6 +15839,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 1
   type: 0
@@ -15694,7 +15972,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222186028401130247
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -15745,7 +16023,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -15928,6 +16206,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 6
   type: 0
@@ -16123,6 +16404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 5
   type: 2
@@ -16145,13 +16429,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137614538171176683}
   countTextGO: {fileID: 2151766367432848429}
+  blockedCountTextAlpha: 0.45
   targetColor: 4
   visualTransform: {fileID: 4269414135532939}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -16162,15 +16473,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1337353206010046
 GameObject:
   m_ObjectHideFlags: 0
@@ -16246,6 +16564,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 6
   type: 0
@@ -16293,6 +16614,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 1
   type: 0
@@ -16398,7 +16722,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222176852159272391
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -16449,7 +16773,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -18900,7 +19224,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1369702376439926}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -21369,7 +21693,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1387457861764850}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -21478,6 +21802,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 6
   type: 0
@@ -21755,7 +22082,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222412829924698232
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -21806,7 +22133,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -21935,12 +22262,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1435466493207263}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -22025,7 +22352,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222790592054001009
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22076,7 +22403,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -22190,7 +22517,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222399608591416191
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22241,7 +22568,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -22454,6 +22781,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 0
   type: 0
@@ -22584,7 +22914,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222236756604641208
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -22635,7 +22965,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -22682,112 +23012,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &1493377554624124
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4587331970960198}
-  - component: {fileID: 33803350703906523}
-  - component: {fileID: 23446890793328516}
-  - component: {fileID: 64899326672286367}
-  m_Layer: 6
-  m_Name: Plane
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4587331970960198
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493377554624124}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0113, y: 0.001, z: 0.1271}
-  m_LocalScale: {x: 0.24468255, y: 0.3, z: 0.5265159}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4280858778817043}
-  m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
---- !u!33 &33803350703906523
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493377554624124}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &23446890793328516
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493377554624124}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: b5effdfb108434b4fa66167085d98d71, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 0
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &64899326672286367
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493377554624124}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1496621418955322
 GameObject:
   m_ObjectHideFlags: 0
@@ -22835,7 +23059,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac2b8a57cee392349a9866176a137aed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 0}
+  config: {fileID: 11400000, guid: 91a87874fa7c9f142a8284c0e69a02ce, type: 2}
   mainRoute: {fileID: 1184957493738903772}
   sidesRoute:
   - {fileID: 1473064460401113762}
@@ -22845,6 +23069,7 @@ MonoBehaviour:
   curveStrength: 0.6
   tailSeedSpeedBoost: 0.45
   farDistanceSpeedBoost: 0.45
+  refillSeedClockwiseYaw: 90
 --- !u!1 &1498356979168873
 GameObject:
   m_ObjectHideFlags: 0
@@ -25416,12 +25641,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1514625852578104}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -27742,7 +27967,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1519973290104670}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -27913,6 +28138,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 2
   type: 0
@@ -27952,7 +28180,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222141280342513544
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -28003,7 +28231,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -28086,7 +28314,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222196666416752938
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -28137,7 +28365,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -28220,7 +28448,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222391587851038057
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -28271,7 +28499,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -30576,7 +30804,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1539434606470459}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -31066,6 +31294,28 @@ MonoBehaviour:
   autoCalculateLength: 1
   distributeEvenly: 1
   fixedSpacing: 2
+  optimizeSideSeedVisuals: 1
+  sideAlwaysVisibleFrontRows: 2
+  sideVisualRefreshInterval: 0.2
+  sideViewportPadding: 0.15
+  strictViewportSeedCulling: 1
+  optimizeMainSeedVisuals: 1
+  mainVisualRefreshInterval: 0.12
+  maxRenderedRowsMainRoute: 10
+  maxRenderedRowsSideRoute: 6
+  optimizeRowRendererCulling: 1
+  optimizeRowRendererSettings: 1
+  allowPbrProbeLightingForRows: 1
+  disableRowShadowCasting: 1
+  disableRowReceiveShadows: 1
+  disableRowLightProbes: 0
+  disableRowReflectionProbes: 0
+  deferRowSpawnOnLowEnd: 1
+  forceDeferredRowSpawn: 0
+  deferredSpawnRowsPerFrame: 10
+  deferredSpawnMinRowsThreshold: 30
+  deferredSpawnLowEndSystemMemoryMb: 3000
+  deferredSpawnLowEndProcessorCount: 4
 --- !u!1 &1566158432349095
 GameObject:
   m_ObjectHideFlags: 0
@@ -31110,6 +31360,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 0
   type: 0
@@ -31156,12 +31409,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1567996005179569}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -33482,7 +33735,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1575480389146612}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -33590,12 +33843,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1576655382543814}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -33702,6 +33955,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 5
   type: 0
@@ -33749,6 +34005,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 4
   type: 0
@@ -33795,12 +34054,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1602423199030203}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -33963,6 +34222,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 3
   type: 2
@@ -33985,13 +34247,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137090172378534690}
   countTextGO: {fileID: 4108338570519832389}
+  blockedCountTextAlpha: 0.45
   targetColor: 2
   visualTransform: {fileID: 4287837029362072}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -34002,15 +34291,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1608955810280162
 GameObject:
   m_ObjectHideFlags: 0
@@ -34145,12 +34441,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1611372219815670}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -34406,12 +34702,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1622502682152410}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -34518,6 +34814,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 0
   type: 0
@@ -34596,6 +34895,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 6
   type: 0
@@ -34650,12 +34952,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1646956564889922}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -34770,8 +35072,8 @@ Transform:
   - {fileID: 4030015348332208}
   - {fileID: 4478654746354148}
   - {fileID: 4525375263153457}
-  - {fileID: 4587331970960198}
   - {fileID: 4853327486126029}
+  - {fileID: 39718163659877641}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5327473646714123976
@@ -34806,6 +35108,64 @@ MonoBehaviour:
   tunnelList: []
   listColor: 02000000050000000100000009000000060000000b0000000500000004000000090000000a00000009000000040000000400000005000000050000000a0000000a00000004000000010000000a0000000900000003000000090000000600000002000000010000000b000000010000000300000009000000
   gridController: {fileID: 4606542140427109859}
+  conveyorMeshFilter: {fileID: 0}
+  conveyorMeshList: []
+  mapMeshFilter: {fileID: 33434504831152721}
+  mapMeshList:
+  - {fileID: 4300000, guid: 1ae8f74309795344ca261a5fcd7a811c, type: 2}
+  - {fileID: 4300000, guid: 0109d9c82b6343d43b7ad733e201940b, type: 2}
+  - {fileID: 4300000, guid: f899fb9d73a7c64409c7c3021d66854b, type: 2}
+  - {fileID: 4300000, guid: ee60b0241663f8c4595df9c21012c1f7, type: 2}
+  - {fileID: 4300000, guid: 622004b9fc089b14ea0bad1be811b679, type: 2}
+  - {fileID: 4300000, guid: 22bd35a434005b84ca86bf2698048865, type: 2}
+  - {fileID: 4300000, guid: 99855f5d3fd430e4badf00fa4548e6ae, type: 2}
+  - {fileID: 4300000, guid: 51a00b15d63855544ae6b17de9a87730, type: 2}
+  - {fileID: 4300000, guid: f0bae8394d3abee44ae2364b92f7ebfc, type: 2}
+  - {fileID: 4300000, guid: e28ac89b4bed3b34e803bbddfa085043, type: 2}
+  - {fileID: 4300000, guid: 8c58085af3024d44491586eb74b83045, type: 2}
+  - {fileID: 4300000, guid: a9c4e07e44c0f1446b75c1204290d78c, type: 2}
+  - {fileID: 4300000, guid: 43c81c9093d86a84f800f8816790ce42, type: 2}
+  - {fileID: 4300000, guid: 0f1eef74a98798c488cf28828b73b4ab, type: 2}
+  - {fileID: 4300000, guid: b6eacd3ee2d514046bb8ccfddd1fff57, type: 2}
+  - {fileID: 4300000, guid: b7d19a4ae30fd7744bdb648c08cbab9e, type: 2}
+  - {fileID: 4300000, guid: 0bf488504fa5f6847b2012ebfe6106e0, type: 2}
+  - {fileID: 4300000, guid: 6274d345f06e9f94faf14f023ac72b78, type: 2}
+  - {fileID: 4300000, guid: 55635ad9b2dfeb5468084720ee99b0f1, type: 2}
+  - {fileID: 4300000, guid: 98c2e7264e45b74419f42418fa56121e, type: 2}
+  - {fileID: 4300000, guid: c658fdd332ffa094e86c8cf8ee7f28c2, type: 2}
+  - {fileID: 4300000, guid: fe5a2cf421798be46bd197db35fc919e, type: 2}
+  - {fileID: 4300000, guid: 52ea27cd53d7de9459b0656436ff9370, type: 2}
+  - {fileID: 4300000, guid: cd9b22469c3f44d48aaf7b4ac192495e, type: 2}
+  - {fileID: 4300000, guid: d6375406a045854499251b7a4b65606a, type: 2}
+  - {fileID: 4300000, guid: c265dbca0fc3cab4594fcaeaf7166a83, type: 2}
+  - {fileID: 4300000, guid: b7e081d0bccfcf247b06ebd9b6a81117, type: 2}
+  - {fileID: 4300000, guid: 7570cff608ce13940bb65458e497928e, type: 2}
+  - {fileID: 4300000, guid: 95855a71b7863fc4bad09de6ce4ee454, type: 2}
+  - {fileID: 4300000, guid: a985711c22e63a64f91f51d86ac02edb, type: 2}
+  - {fileID: 4300000, guid: aa09fd0d131d4b0418647b705f12bbd5, type: 2}
+  - {fileID: 4300000, guid: 9ae29e6dbc3582340bad92bc633c48b8, type: 2}
+  - {fileID: 4300000, guid: 45728ae4d0129684e9d5838dd842126f, type: 2}
+  - {fileID: 4300000, guid: 4d4e5c2db5c8e8742961f952dd3819a1, type: 2}
+  - {fileID: 4300000, guid: 34a9239b9a290ca4181ec9f2a6f751a6, type: 2}
+  - {fileID: 4300000, guid: 85e5b386172ff8e4d86d8faf1c5e4905, type: 2}
+  - {fileID: 4300000, guid: 52b03559cac42bd4cbaf964752456fea, type: 2}
+  - {fileID: 4300000, guid: 665a91c0e17546d47b367d98dd3473c2, type: 2}
+  - {fileID: 4300000, guid: c443c0648275acd4ba111e27a43aae0b, type: 2}
+  - {fileID: 4300000, guid: 01e26c9daa820874a87bb576f511c6f5, type: 2}
+  - {fileID: 4300000, guid: 426f2e34905e2ce49887ef73e6404cc7, type: 2}
+  - {fileID: 4300000, guid: c057fa7e3e16b6a4980e92b7cd54c893, type: 2}
+  - {fileID: 4300000, guid: b5fda948ce9c43f4d8e4f6015ebd40e9, type: 2}
+  - {fileID: 4300000, guid: 51f998e4b49b0394e9613f7b69dd04a4, type: 2}
+  - {fileID: 4300000, guid: b16812841177f9b41abfea649c3da934, type: 2}
+  - {fileID: 4300000, guid: 702c40998453f244faf5deff4ccd3edc, type: 2}
+  - {fileID: 4300000, guid: da6eb14113b7eef45b8723c4572cc817, type: 2}
+  - {fileID: 4300000, guid: 02ed93488c2d17040b5df4171de9f3ad, type: 2}
+  - {fileID: 4300000, guid: 77466fba754988948adeaf9a3f19784f, type: 2}
+  - {fileID: 4300000, guid: ab8e02e1a1ba3e5418de5f0c34ce0b64, type: 2}
+  batchShooterStateInitOnLowEnd: 1
+  shooterStateBatchSizeOnLowEnd: 8
+  lowEndSystemMemoryMb: 3000
+  lowEndProcessorCount: 4
   data:
     countMainRow: 0
     countSideRows: 
@@ -34844,6 +35204,25 @@ MonoBehaviour:
   slotBar: {fileID: 4841574516546781843}
   outroOnlyObject: {fileID: 1379625471379181}
   config: {fileID: 11400000, guid: 0dc71bdcdae57904c914248e2139f6d7, type: 2}
+  optimizeRenderersAfterIntro: 1
+  optimizeShooterRenderersAfterIntro: 1
+  optimizeWallRenderersAfterIntro: 1
+  combineStaticWallMeshesAfterIntro: 1
+  preserveShooterShadowCastingAfterIntro: 1
+  disableWallShadowCastingAfterIntro: 1
+  disableShooterReceiveShadowsAfterIntro: 1
+  disableWallReceiveShadowsAfterIntro: 1
+  disableLightAndReflectionProbesForOptimizedRenderers: 1
+  deferPostIntroOptimization: 1
+  deferredPostIntroOptimizationFrames: 2
+  enableLowEndIntroLiteMode: 1
+  lowEndSystemMemoryMb: 3000
+  lowEndProcessorCount: 4
+  forceSkipIntroAnimation: 0
+  skipWholeIntroTweenOnLowEnd: 1
+  skipSlotIntroTweenOnLowEnd: 1
+  skipPostIntroOptimizationOnLowEnd: 1
+  skipStaticBatchingOnLowEnd: 1
 --- !u!1 &1658428626091892
 GameObject:
   m_ObjectHideFlags: 0
@@ -34895,12 +35274,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1658428626091892}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -34992,12 +35371,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1674626300383543}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -37665,6 +38044,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 0
   col: 2
   type: 2
@@ -37687,13 +38069,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137726233128599747}
   countTextGO: {fileID: 6553474229390959650}
+  blockedCountTextAlpha: 0.45
   targetColor: 1
   visualTransform: {fileID: 4046000682074489}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -37704,15 +38113,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1714445433940618
 GameObject:
   m_ObjectHideFlags: 0
@@ -37788,6 +38204,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 1
   type: 0
@@ -37891,6 +38310,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 5
   type: 2
@@ -37913,13 +38335,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137250675030483310}
   countTextGO: {fileID: 482354918430537080}
+  blockedCountTextAlpha: 0.45
   targetColor: 1
   visualTransform: {fileID: 4822571015029164}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -37930,15 +38379,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1744334622536787
 GameObject:
   m_ObjectHideFlags: 0
@@ -40258,7 +40714,7 @@ ParticleSystemRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1745306911078366}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -40546,6 +41002,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 1
   type: 2
@@ -40568,13 +41027,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137340736579558141}
   countTextGO: {fileID: 7634140348108492609}
-  targetColor: 0
+  blockedCountTextAlpha: 0.45
+  targetColor: 10
   visualTransform: {fileID: 4649453159811870}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -40585,15 +41071,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1872264882117725}
   questionMarkEffect: {fileID: 1539434606470459}
 --- !u!1 &1762599788286818
@@ -40702,6 +41195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 2
   type: 0
@@ -40774,6 +41270,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 3
   type: 2
@@ -40796,13 +41295,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137875384270002234}
   countTextGO: {fileID: 4118271632070281199}
+  blockedCountTextAlpha: 0.45
   targetColor: 10
   visualTransform: {fileID: 4949225890414496}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -40813,15 +41339,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1772411494016178
 GameObject:
   m_ObjectHideFlags: 0
@@ -43221,12 +43754,12 @@ MeshRenderer:
   m_GameObject: {fileID: 1774812608758021}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -43311,7 +43844,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222340137781673229
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -43362,7 +43895,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -43633,7 +44166,13 @@ MonoBehaviour:
   - {fileID: 6436906440369513554}
   - {fileID: 6004405707476041945}
   - {fileID: 6574330417920314671}
-  endNodes: []
+  endNodes:
+  - {fileID: 2176826560612312258}
+  - {fileID: 1744867646519575651}
+  - {fileID: 682431054966887988}
+  - {fileID: 7419448394051604896}
+  endNodeSnapshots: []
+  endNodeIntegrityCheckInterval: 0.35
 --- !u!1 &1796601814838055
 GameObject:
   m_ObjectHideFlags: 0
@@ -43955,12 +44494,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1828895140901796}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -44240,6 +44779,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 5
   col: 3
   type: 2
@@ -44262,13 +44804,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137836686936929992}
   countTextGO: {fileID: 7570932947754193091}
+  blockedCountTextAlpha: 0.45
   targetColor: 6
   visualTransform: {fileID: 4033217202977231}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -44279,15 +44848,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
-  shootAudioConfig: {fileID: 0}
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
+  shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
   questionMarkTxt: {fileID: 1915917519753474}
   questionMarkEffect: {fileID: 1387457861764850}
 --- !u!1 &1848081814439636
@@ -44364,12 +44940,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1850242273206430}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -44475,12 +45051,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1856609561012149}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -44671,6 +45247,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 4
   col: 4
   type: 0
@@ -44718,6 +45297,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 3
   type: 0
@@ -44765,6 +45347,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 2
   col: 5
   type: 0
@@ -47481,12 +48066,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1921496759680348}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -47592,12 +48177,12 @@ SkinnedMeshRenderer:
   m_GameObject: {fileID: 1923080702560850}
   m_Enabled: 1
   m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
   m_RayTracingMode: 3
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
@@ -47760,6 +48345,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 4
   type: 2
@@ -47782,13 +48370,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137873984629011614}
   countTextGO: {fileID: 6153060231024084774}
+  blockedCountTextAlpha: 0.45
   targetColor: 11
   visualTransform: {fileID: 4112826196733620}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -47799,15 +48414,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1925926802559165
 GameObject:
   m_ObjectHideFlags: 0
@@ -48073,6 +48695,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 3
   col: 5
   type: 0
@@ -48145,6 +48770,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c24c541eccdb548813c7fa2ea2d1c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applyRuntimeLocalOffset: 1
+  runtimeLocalOffsetY: 0.015
+  runtimeLocalOffsetZ: 0.05
   row: 1
   col: 2
   type: 2
@@ -48167,13 +48795,40 @@ MonoBehaviour:
   bulletDecreaseAmount: 5
   mesh: {fileID: 137838648889099388}
   countTextGO: {fileID: 3631629636391293510}
+  blockedCountTextAlpha: 0.45
   targetColor: 4
   visualTransform: {fileID: 4543103448266389}
   autoSyncTargetColorFromMaterial: 1
   materialColorSyncInterval: 0.2
+  syncOutlineColorFromBaseWhenInDeck: 1
   autoSyncChildrenLayerFromRoot: 1
-  forceShooterRenderOnTop: 1
-  shooterTopSortingOrder: 10000
+  optimizeShooterRendererForMobile: 1
+  forceEnableShooterShadowCasting: 1
+  disableShooterShadowCasting: 1
+  disableShooterReceiveShadows: 1
+  disableShooterLightProbes: 1
+  disableShooterReflectionProbes: 1
+  adaptiveShooterRendering: 1
+  allowAggressiveShooterCullingRuntime: 0
+  shooterRenderRefreshInterval: 0.2
+  optimizeShooterMaterialByState: 1
+  hideSecondaryRenderersWhenNotCombat: 1
+  simplifyPrimaryMaterialWhenNotCombat: 0
+  cullShooterWhenOffscreen: 1
+  shooterCullViewportPadding: 0.08
+  reduceSecondaryRenderersWhenFar: 1
+  secondaryRendererHideDistance: 9
+  adaptiveShooterShadowByDistance: 1
+  shooterShadowDistance: 7
+  enforceShooterDetailBudget: 0
+  maxFullDetailShootersOnScreen: 6
+  enforceVisibleShooterBudget: 0
+  maxVisibleShootersOnScreen: 10
+  shooterDetailBudgetRefreshInterval: 0.2
+  hideLowPriorityShootersOverBudget: 1
+  lowPriorityHideDistanceWhenOverBudget: 6
+  alwaysKeepHiddenShooterVisible: 1
+  alwaysKeepHiddenShooterShadow: 1
   currentState: 0
   slotBar: {fileID: 4841574516546781843}
   gridController: {fileID: 4606542140427109859}
@@ -48184,15 +48839,22 @@ MonoBehaviour:
   bulletSpreadShotDelay: 0.02
   seedShotInterval: 0.08
   bulletSpreadRadius: 0.2
+  enforceVisualBulletFrameBudget: 1
+  maxVisualBulletsPerFrame: 90
   rowHandoffDelay: 0
+  targetQueueRefreshInterval: 0.08
+  targetQueueFallbackRefreshInterval: 0.22
+  targetQueueRefreshIntervalScale: 0.9
   shootAudioConfig: {fileID: 11400000, guid: 68692fd14cc00e9429a11961adb714a8, type: 2}
   useSimulatedShootSfx: 1
   simulatedShootSfxInterval: 0.12
+  animationSpeedRefreshInterval: 0.08
   disappearParticle: {fileID: 0}
   jumpDisappearParticle: {fileID: 0}
   jumpEffect: {fileID: 0}
   recoilDistance: 0.2
   recoilDuration: 0.05
+  heroCameraEdgePaddingOrtho: 0.35
 --- !u!1 &1979707215709790
 GameObject:
   m_ObjectHideFlags: 0
@@ -48412,7 +49074,7 @@ RectTransform:
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0.65}
 --- !u!222 &222361411840950536
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -48463,7 +49125,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -48699,3 +49361,131 @@ MonoBehaviour:
   autoCalculateLength: 1
   distributeEvenly: 1
   fixedSpacing: 2
+  optimizeSideSeedVisuals: 1
+  sideAlwaysVisibleFrontRows: 2
+  sideVisualRefreshInterval: 0.2
+  sideViewportPadding: 0.15
+  strictViewportSeedCulling: 1
+  optimizeMainSeedVisuals: 1
+  mainVisualRefreshInterval: 0.12
+  maxRenderedRowsMainRoute: 10
+  maxRenderedRowsSideRoute: 6
+  optimizeRowRendererCulling: 1
+  optimizeRowRendererSettings: 1
+  allowPbrProbeLightingForRows: 1
+  disableRowShadowCasting: 1
+  disableRowReceiveShadows: 1
+  disableRowLightProbes: 0
+  disableRowReflectionProbes: 0
+  deferRowSpawnOnLowEnd: 1
+  forceDeferredRowSpawn: 0
+  deferredSpawnRowsPerFrame: 10
+  deferredSpawnMinRowsThreshold: 30
+  deferredSpawnLowEndSystemMemoryMb: 3000
+  deferredSpawnLowEndProcessorCount: 4
+--- !u!1 &3450773767241991540
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 39718163659877641}
+  - component: {fileID: 3431965888947811311}
+  - component: {fileID: 235044069552412050}
+  - component: {fileID: 3018741906768287133}
+  m_Layer: 6
+  m_Name: Plane
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &39718163659877641
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3450773767241991540}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.026, y: 0, z: -1.2}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 0.35}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 4280858778817043}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &3431965888947811311
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3450773767241991540}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &235044069552412050
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3450773767241991540}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 57daf6fc1d4d0f0429065ae731920f2f, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &3018741906768287133
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3450773767241991540}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
