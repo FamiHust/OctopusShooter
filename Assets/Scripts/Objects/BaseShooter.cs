@@ -2404,7 +2404,6 @@ public class BaseShooter : MonoBehaviour
             if (spawnedStone != null)
             {
                 AudioManager.Instance?.PlaySFX(Const.spawnMagicStoneSFX);
-                AccumulateMagicStoneRewardForCurrentLevel(1);
             }
 
             return spawnedStone != null;
@@ -2772,14 +2771,14 @@ public class BaseShooter : MonoBehaviour
         return 0.2f;
     }
 
-    private static void AccumulateMagicStoneRewardForCurrentLevel(int amount)
+    public static void AccumulateMagicStoneRewardForCurrentLevel(int amount)
     {
         if (amount <= 0)
         {
             return;
         }
 
-        pendingMagicStoneRewardForCurrentLevel += amount;
+        pendingMagicStoneRewardForCurrentLevel = Mathf.Min(3, pendingMagicStoneRewardForCurrentLevel + amount);
         NotifyMagicStoneProgressChanged();
     }
 
@@ -2809,7 +2808,7 @@ public class BaseShooter : MonoBehaviour
 
     public static int GetCollectedMagicStoneForCurrentLevel()
     {
-        return Mathf.Max(0, pendingMagicStoneRewardForCurrentLevel);
+        return Mathf.Clamp(pendingMagicStoneRewardForCurrentLevel, 0, 3);
     }
 
     private static void NotifyMagicStoneProgressChanged()
@@ -3252,7 +3251,7 @@ public class BaseShooter : MonoBehaviour
             Ease jumpScaleEase = GetJumpScaleEase();
             Ease jumpMoveEase = GetJumpMoveEase();
             Tween jumpScaleTween = transform.DOScale(targetScale, jumpDur).SetEase(jumpScaleEase);
-            Tween jumpMoveTween = transform.DOJump(targetPosition + Vector3.up * 0.01f, 0.5f, 1, jumpDur).SetEase(jumpMoveEase);
+            Tween jumpMoveTween = transform.DOJump(targetPosition + Vector3.up * 0.05f, 1f, 1, jumpDur).SetEase(jumpMoveEase);
             Tween jumpRotateTween = transform.DOLocalRotate(new Vector3(0f, 180f, 0f), jumpDur).SetEase(jumpMoveEase);
             if (runJumpTweenUnscaled)
             {

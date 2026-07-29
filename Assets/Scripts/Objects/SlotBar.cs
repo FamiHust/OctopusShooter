@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 #if UNITY_EDITOR
@@ -448,6 +448,7 @@ public class SlotBar : MonoBehaviour
 
         // 3. Táº¡o Slot má»›i
         Slot newSlot = Instantiate(slotPrefab, transform);
+        AudioManager.Instance?.PlaySFX(Const.popUISFX);
 
         // TÃ­nh toÃ¡n vá»‹ trÃ­ X chuáº©n cho Slot má»›i
         float newSlotTargetX = targetXs[newIndex];

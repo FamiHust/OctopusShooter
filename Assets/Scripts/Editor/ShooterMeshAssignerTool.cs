@@ -385,6 +385,12 @@ public class ShooterMeshAssignerTool : EditorWindow
 
         GUI.backgroundColor = Color.white;
         GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+        if (GUILayout.Button("🛠️ MỞ TOOL TẠO MESH SKINNED MỚI (CHUYỂN MESH THƯỜNG THÀNH ASSET SKINNED)", GUILayout.Height(32)))
+        {
+            ShooterMeshSkinnerTool.OpenWindow();
+        }
     }
 
     private void ExecuteShooterMeshAssignment()

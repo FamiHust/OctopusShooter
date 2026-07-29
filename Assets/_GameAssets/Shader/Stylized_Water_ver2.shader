@@ -1,4 +1,4 @@
-﻿Shader "Custom/MobileCartoonWater_CausticsShoreCutoff"
+Shader "Custom/MobileCartoonWater_CausticsShoreCutoff"
 {
     Properties
     {
@@ -31,20 +31,33 @@
         _FoamNoiseFactor ("Foam Noise Factor", Range(0.0, 1.0)) = 0.4
         _FoamWaterFade ("Foam Water-Side Fade", Range(0.001, 0.4)) = 0.05
         _FoamShoreFade ("Foam Shore-Side Fade", Range(0.001, 0.4)) = 0.05
+
+        [Header(Shadow Refraction)]
+        _ShadowColor ("Shadow Color (Mau bong)", Color) = (0.08, 0.18, 0.35, 1.0)
+        _ShadowStrength ("Shadow Strength (Cuong do bong)", Range(0, 1)) = 0.85
+        _ShadowDistortion ("Shadow Distortion (Do meo va di chuyen bong theo song)", Range(0, 5)) = 1.5
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        // Queue AlphaTest+50 (2450) cho phep Unity Render Pipeline thu nhan Screen Space Shadows
+        // trong khi van giu Blend SrcAlpha OneMinusSrcAlpha & ZWrite Off cho mat nuoc trong suot.
+        Tags { "RenderType"="Transparent" "Queue"="AlphaTest+50" }
         LOD 100
         ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass
         {
+            Tags { "LightMode"="ForwardBase" }
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma multi_compile_fwdbase_fullshadows
+
             #include "UnityCG.cginc"
+            #include "AutoLight.cginc"
+            #include "Lighting.cginc"
 
             struct appdata
             {
@@ -55,7 +68,9 @@
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
+                float4 pos : SV_POSITION;
+                float3 worldPos : TEXCOORD1;
+                UNITY_SHADOW_COORDS(2)
             };
 
             sampler2D _NoiseTex;
@@ -91,6 +106,10 @@
             half _FoamWaterFade;
             half _FoamShoreFade;
 
+            half4 _ShadowColor;
+            half _ShadowStrength;
+            half _ShadowDistortion;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -100,8 +119,11 @@
                 float wave = sin(v.uv.x * _WaveScale + _Time.y * _WaveSpeed) * _WaveStrength * shoreFactor;
                 localPos.z += wave;
 
-                o.vertex = UnityObjectToClipPos(localPos);
+                o.pos = UnityObjectToClipPos(localPos);
                 o.uv = v.uv;
+                o.worldPos = mul(unity_ObjectToWorld, localPos).xyz;
+
+                TRANSFER_SHADOW(o);
                 return o;
             }
 
@@ -117,12 +139,35 @@
                 float2 noiseUV = TRANSFORM_TEX(i.uv, _NoiseTex) + _NoiseSpeed.xy * _Time.y;
                 float2 distortionOffset = (tex2D(_NoiseTex, noiseUV).rg * 2.0 - 1.0) * _DistortionStrength;
 
+                // --- BONG DI CHUYEN & KHUC XA THEO SONG NUOC (Shadow Moving with Wave & Noise) ---
+                float shoreFactor = 1.0 - i.uv.y;
+                float wavePhase = i.uv.x * _WaveScale + _Time.y * _WaveSpeed;
+                float waveHeight = sin(wavePhase) * _WaveStrength * shoreFactor;
+                float waveSlope = cos(wavePhase) * _WaveStrength * shoreFactor;
+
+                // Vector di chuyen bong theo nhip cuon cua song va do doc mat nuoc
+                float2 waveMotionOffset = float2(waveSlope, waveHeight) * 3.0;
+
+                // Tong hop dich chuyen bong
+                float2 shadowRefraction = (waveMotionOffset + distortionOffset * 10.0) * _ShadowDistortion;
+
+                v2f shadowInput = i;
+                #if defined(SHADOWS_SCREEN)
+                    shadowInput._ShadowCoord.xy += shadowRefraction * shadowInput._ShadowCoord.w;
+                #else
+                    shadowInput.worldPos.xz += shadowRefraction;
+                #endif
+
+                UNITY_LIGHT_ATTENUATION(atten, shadowInput, shadowInput.worldPos);
+                half shadowMask = (1.0 - saturate(atten)) * _ShadowStrength;
+                // --------------------------------------------------------------------------------
+
                 // 3. Van nuoc Caustics cuon
                 float2 causticsUV = TRANSFORM_TEX(i.uv, _CausticsTex) + distortionOffset + _CausticsSpeed.xy * _Time.y;
                 half causticsSample = tex2D(_CausticsTex, causticsUV).r;
                 half causticsMask = smoothstep(_Threshold, _Threshold + _Smoothing, causticsSample);
 
-                // --- BỘ LỌC GIỚI HẠN VÂN CAUSTICS HAI ĐẦU (NÔNG VÀ SÂU) ---
+                // --- BO LOC GIOI HAN VAN CAUSTICS HAI DAU (NONG VA SAU) ---
                 half deepMask = smoothstep(_ShoreCutoff, 0.0, i.uv.y); // An van o vung nuoc sau
                 
                 // NEW: Day van nuoc cach ly khoi mep bo sat uv.y = 0
@@ -154,9 +199,14 @@
                 // 5. De lop bot trang len tren cung
                 half4 finalColor = lerp(waterColor, _FoamColor, foamMask * _FoamColor.a);
 
+                // 6. Ap dung bong khuc xa (Refracted Shadow Tint)
+                half3 shadedRGB = lerp(finalColor.rgb, finalColor.rgb * _ShadowColor.rgb, _ShadowColor.a);
+                finalColor.rgb = lerp(finalColor.rgb, shadedRGB, shadowMask);
+
                 return finalColor;
             }
             ENDCG
         }
     }
+    Fallback "VertexLit"
 }

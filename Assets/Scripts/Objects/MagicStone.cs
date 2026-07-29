@@ -154,6 +154,8 @@ public class MagicStone : MonoBehaviour
 		AudioManager.Instance?.PlaySFX(Const.clickMagicStoneSFX);
 		KillMotionTweens();
 
+		BaseShooter.AccumulateMagicStoneRewardForCurrentLevel(1);
+
 		if (disappearVfxPrefab != null)
 		{
 			if (ownerShooter != null)

@@ -127,6 +127,7 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private GameObject magicStoneObjectivePanel;
     [SerializeField] private Text magicStoneObjectiveText;
     [SerializeField] private Button magicStoneButton;
+    [SerializeField] private Image magicStoneImage;
     [Tooltip("Hiển thị UI MagicStone từ level này trở lên")]
     [Min(1)]
     [SerializeField] private int showMagicStoneUIAtLevel = 3;
@@ -181,6 +182,7 @@ public class InGameUIManager : MonoBehaviour
     private int cachedCoinBalance = -1;
     private readonly List<Tween> gameplayCoinFlyTweens = new List<Tween>(32);
     private readonly List<GameObject> activeGameplayCoinFlyObjects = new List<GameObject>(32);
+    private Tween magicStoneFillTween;
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Init (gá»i trÆ°á»›c InitLevel)
@@ -269,7 +271,7 @@ public class InGameUIManager : MonoBehaviour
         GameEventHub.Instance.AddListener(GameEventType.OnGameLose,             OnGameLose);
         GameEventHub.Instance.AddListener(GameEventType.OnMagicStoneProgressChanged, OnMagicStoneProgressChanged);
         UpdateCoinAndLevelUI(true);
-        UpdateMagicStoneObjectiveUI();
+        UpdateMagicStoneObjectiveUI(animate: false);
         UpdateTopUIVisibility();
         SetButton();
     }
@@ -290,6 +292,11 @@ public class InGameUIManager : MonoBehaviour
         hasPlayedHardLevelIntro = false;
         ResetLastFourPraiseState(true);
         KillGameplayCoinFlyTweens();
+        if (magicStoneFillTween != null && magicStoneFillTween.IsActive())
+        {
+            magicStoneFillTween.Kill();
+        }
+        magicStoneFillTween = null;
         UpdateMagicStoneReadyHighlight(false);
 
         if (GameEventHub.Instance == null) return;
@@ -933,7 +940,7 @@ public class InGameUIManager : MonoBehaviour
     }
     private void OnSlotBarInit(object _)
     {
-        UpdateMagicStoneObjectiveUI();
+        UpdateMagicStoneObjectiveUI(animate: false);
         RefreshAllButtons();
     }
 
@@ -1249,7 +1256,7 @@ public class InGameUIManager : MonoBehaviour
         SetActiveIfChanged(topUIPanel, shouldShowTopUI);
     }
 
-    private void UpdateMagicStoneObjectiveUI()
+    private void UpdateMagicStoneObjectiveUI(bool animate = true)
     {
         int required = gamePlayController != null
             ? gamePlayController.GetMagicStoneClearCost()
@@ -1276,9 +1283,57 @@ public class InGameUIManager : MonoBehaviour
         }
 
         int collected = BaseShooter.GetCollectedMagicStoneForCurrentLevel();
+        if (collected > 3)
+        {
+            collected = 3;
+        }
+
         if (magicStoneObjectiveText != null)
         {
             magicStoneObjectiveText.text = Mathf.Max(0, collected) + "/" + Mathf.Max(1, required);
+        }
+
+        if (magicStoneImage == null && magicStoneObjectivePanel != null)
+        {
+            Transform imgChild = magicStoneObjectivePanel.transform.Find("MagicStoneImage");
+            if (imgChild == null)
+            {
+                imgChild = magicStoneObjectivePanel.transform.Find("ProgressImage");
+            }
+            if (imgChild != null)
+            {
+                magicStoneImage = imgChild.GetComponent<Image>();
+            }
+        }
+
+        if (magicStoneImage != null)
+        {
+            float targetFill = Mathf.Clamp01((float)collected / 3f);
+
+            if (magicStoneFillTween != null && magicStoneFillTween.IsActive())
+            {
+                magicStoneFillTween.Kill();
+            }
+
+            if (animate && gameObject.activeInHierarchy && !Mathf.Approximately(magicStoneImage.fillAmount, targetFill))
+            {
+                magicStoneFillTween = DOVirtual.Float(
+                    magicStoneImage.fillAmount,
+                    targetFill,
+                    0.45f,
+                    fill =>
+                    {
+                        if (magicStoneImage != null)
+                        {
+                            magicStoneImage.fillAmount = fill;
+                        }
+                    }
+                ).SetEase(Ease.OutCubic).SetUpdate(true);
+            }
+            else
+            {
+                magicStoneImage.fillAmount = targetFill;
+            }
         }
 
         if (magicStoneButton != null)
