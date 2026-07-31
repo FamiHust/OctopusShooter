@@ -234,7 +234,7 @@ public class IceShooter : BaseShooter
 
         base.CheckShooterState();
 
-        PlayPunchScaleToBase(new Vector3(0.2f, 0.2f, 0.2f), 0.35f, 6, 0.5f);
+        transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0.2f), 0.35f, 6, 0.5f);
     }
 
     private void SetShooterVisualsActive(bool active)
