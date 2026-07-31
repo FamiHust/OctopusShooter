@@ -377,6 +377,7 @@ public class BoosterManager : MonoBehaviour
         SetMainRoutePausedForBooster(true);
 
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterActivated, currentMode);
+        TutorialManager.Instance?.SetDimOverlayActiveForBooster(true);
         NotifyAllLockedShooters(highlight: true);
     }
 
@@ -421,6 +422,7 @@ public class BoosterManager : MonoBehaviour
         ActiveConfig   = null;
         SetMainRoutePausedForBooster(false);
 
+        TutorialManager.Instance?.SetDimOverlayActiveForBooster(false);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterDeactivated, null);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterButtonRefresh, null);
 
@@ -444,6 +446,8 @@ public class BoosterManager : MonoBehaviour
 
     private void NotifyAllLockedShooters(bool highlight, BaseShooter except = null)
     {
+        TutorialManager tutMgr = TutorialManager.Instance;
+
         BaseShooter.FillRegisteredShooterBuffer(shooterBuffer, true);
         for (int i = 0; i < shooterBuffer.Count; i++)
         {
@@ -451,10 +455,22 @@ public class BoosterManager : MonoBehaviour
             if (s == except) continue;
             if (s.GetCurrentState() == ShooterState.Lock)
             {
-                if (highlight) s.PlayBoosterHighlightAnimation();
-                else           s.StopBoosterHighlightAnimation();
+                if (highlight)
+                {
+                    s.PlayBoosterHighlightAnimation();
+                    tutMgr?.HighlightGameObjectForBooster(s.gameObject);
+                }
+                else
+                {
+                    s.StopBoosterHighlightAnimation();
+                }
                 s.RefreshBlockedStateScale();
             }
+        }
+
+        if (!highlight)
+        {
+            tutMgr?.RestoreBoosterHighlights();
         }
     }
 

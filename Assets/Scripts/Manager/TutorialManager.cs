@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -183,8 +183,106 @@ public class TutorialManager : MonoBehaviour
     // PUBLIC API
     // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
+    // ──────────────────────────────────────────────────────────────────
+    // PUBLIC API (BOOSTER DIM & HIGHLIGHT)
+    // ──────────────────────────────────────────────────────────────────
+
+    private readonly List<(GameObject obj, int originalLayer)> boosterHighlightedObjects = new List<(GameObject, int)>();
+    private int originalTutorialCanvasSortingOrder = -1;
+    private bool hasSavedTutorialCanvasSortingOrder = false;
+
     /// <summary>
-    /// QuÃ©t táº¥t cáº£ tutorial chÆ°a cháº¡y theo type
+    /// Bật/tắt dim overlay cho Booster (KHÔNG làm tối UI và KHÔNG block button click)
+    /// </summary>
+    public void SetDimOverlayActiveForBooster(bool active)
+    {
+        if (dimOverlay != null)
+        {
+            dimOverlay.gameObject.SetActive(active);
+            dimOverlay.raycastTarget = false; // Không block click UI
+        }
+
+        if (tutorialCanvasGroup != null)
+        {
+            tutorialCanvasGroup.DOKill();
+            tutorialCanvasGroup.alpha = active ? 1f : 0f;
+            tutorialCanvasGroup.interactable = false; // Không block UI
+            tutorialCanvasGroup.blocksRaycasts = false; // Không block UI
+        }
+
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(active);
+        }
+
+        // Đưa Canvas tutorial xuống dưới Canvas InGameUI để UI không bị tối
+        Canvas tutCanvas = tutorialPanel != null ? tutorialPanel.GetComponentInParent<Canvas>() : null;
+        if (tutCanvas != null)
+        {
+            if (active)
+            {
+                if (!hasSavedTutorialCanvasSortingOrder)
+                {
+                    originalTutorialCanvasSortingOrder = tutCanvas.sortingOrder;
+                    hasSavedTutorialCanvasSortingOrder = true;
+                }
+
+                Canvas inGameCanvas = InGameUIManager.Instance != null ? InGameUIManager.Instance.GetComponentInParent<Canvas>() : null;
+                if (inGameCanvas != null)
+                {
+                    tutCanvas.overrideSorting = true;
+                    tutCanvas.sortingLayerID = inGameCanvas.sortingLayerID;
+                    tutCanvas.sortingOrder = Mathf.Max(0, inGameCanvas.sortingOrder - 1);
+                }
+            }
+            else
+            {
+                if (hasSavedTutorialCanvasSortingOrder)
+                {
+                    tutCanvas.sortingOrder = originalTutorialCanvasSortingOrder;
+                    hasSavedTutorialCanvasSortingOrder = false;
+                }
+            }
+        }
+
+        if (!active)
+        {
+            RestoreBoosterHighlights();
+        }
+    }
+
+    /// <summary>
+    /// Đưa 1 GameObject sang tutorial layer để hiển thị sáng nổi bật trên nền dim
+    /// </summary>
+    public void HighlightGameObjectForBooster(GameObject obj)
+    {
+        if (obj == null) return;
+        int tutLayer = LayerMaskToLayer(tutorialCamLayer);
+        if (tutLayer >= 0)
+        {
+            boosterHighlightedObjects.Add((obj, obj.layer));
+            SetLayerRecursively(obj, tutLayer);
+        }
+    }
+
+    /// <summary>
+    /// Trả tất cả GameObject đã highlight về layer ban đầu
+    /// </summary>
+    public void RestoreBoosterHighlights()
+    {
+        for (int i = 0; i < boosterHighlightedObjects.Count; i++)
+        {
+            var item = boosterHighlightedObjects[i];
+            if (item.obj != null)
+            {
+                SetLayerRecursively(item.obj, item.originalLayer);
+            }
+        }
+        boosterHighlightedObjects.Clear();
+    }
+
+    /// <summary>
+    /// Quát tất cả tutorial chưa chạy theo type
     /// Tráº£ vá» danh sÃ¡ch tutorial names chÆ°a hoÃ n thÃ nh VÃ€ Ä‘Ã£ Ä‘á»§ Ä‘iá»u kiá»‡n cháº¡y (feature Ä‘Ã£ unlock)
     /// </summary>
     public List<string> GetIncompleteTutorials()
