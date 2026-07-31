@@ -1823,6 +1823,45 @@ public class BaseShooter : MonoBehaviour
         return false;
     }
 
+    public Vector3 BaseLocalScale
+    {
+        get
+        {
+            CacheBaseLocalScaleIfNeeded();
+            return baseLocalScale;
+        }
+    }
+
+    public void PlayPunchScaleToBase(Vector3 punch, float duration = 0.35f, int vibrato = 6, float elasticity = 0.5f)
+    {
+        CacheBaseLocalScaleIfNeeded();
+        stateScaleTween?.Kill();
+        transform.DOKill();
+
+        bool isPickLockedActive = BoosterManager.Instance != null && BoosterManager.Instance.IsPickLockedShooterModeActive();
+        bool isBlocked;
+        if (currentState == ShooterState.Lock)
+        {
+            isBlocked = !isPickLockedActive;
+        }
+        else if (currentState == ShooterState.Frozen)
+        {
+            isBlocked = IsCurrentlyBlockedOnGrid();
+        }
+        else
+        {
+            isBlocked = false;
+        }
+
+        Vector3 targetScale = isBlocked ? (baseLocalScale * blockedStateScaleMultiplier) : baseLocalScale;
+
+        transform.localScale = targetScale;
+        stateScaleTween = transform.DOPunchScale(punch, duration, vibrato, elasticity).OnComplete(() =>
+        {
+            transform.localScale = targetScale;
+        });
+    }
+
     public void RefreshBlockedStateScale()
     {
         UpdateStateScale(currentState);
