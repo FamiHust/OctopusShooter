@@ -384,6 +384,7 @@ public class BoosterManager : MonoBehaviour
     {
         if (currentMode != ActiveBoosterMode.PickLockedShooter) return;
 
+        currentMode = ActiveBoosterMode.None;
         NotifyAllLockedShooters(highlight: false, except: shooter);
 
         if (!TryConsumeBooster(pickLockedCfg.boosterName, 1))
@@ -407,6 +408,7 @@ public class BoosterManager : MonoBehaviour
     public void CancelPickLockedShooterMode()
     {
         if (currentMode != ActiveBoosterMode.PickLockedShooter) return;
+        currentMode = ActiveBoosterMode.None;
         NotifyAllLockedShooters(highlight: false);
         ExitPickLockedShooterMode(completed: false);
     }
@@ -451,6 +453,7 @@ public class BoosterManager : MonoBehaviour
             {
                 if (highlight) s.PlayBoosterHighlightAnimation();
                 else           s.StopBoosterHighlightAnimation();
+                s.RefreshBlockedStateScale();
             }
         }
     }
@@ -465,6 +468,9 @@ public class BoosterManager : MonoBehaviour
     public bool IsBoosterModeActive(string boosterName)
         => currentMode != ActiveBoosterMode.None
            && ActiveConfig?.boosterName == boosterName;
+
+    public bool IsHeroShooterModeActive()
+        => currentMode == ActiveBoosterMode.HeroShooter;
 
     // ──────────────────────────────────────────────────────────────────
     // HeroShooter mode

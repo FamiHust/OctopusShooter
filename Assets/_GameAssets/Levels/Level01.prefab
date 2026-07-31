@@ -465,8 +465,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 2054506732406636433}
   gridController: {fileID: 2452323474243788253}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 1706631759315518, guid: deeed134620a9ff45b916479814ec00f, type: 3}
   fireRate: 1
@@ -13398,7 +13401,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1613492518562455}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: -0.9848078, z: 0.17364816, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0.39999998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -13406,7 +13409,7 @@ Transform:
   - {fileID: 4370246842672431}
   - {fileID: 224256042321546665}
   m_Father: {fileID: 4412191972648087}
-  m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
+  m_LocalEulerAnglesHint: {x: 20, y: -180, z: -0}
 --- !u!65 &65644589091155393
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13500,8 +13503,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 2054506732406636433}
   gridController: {fileID: 2452323474243788253}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 1706631759315518, guid: deeed134620a9ff45b916479814ec00f, type: 3}
   fireRate: 1
@@ -13654,8 +13660,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 2054506732406636433}
   gridController: {fileID: 2452323474243788253}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 1706631759315518, guid: deeed134620a9ff45b916479814ec00f, type: 3}
   fireRate: 1
@@ -13808,8 +13817,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 2054506732406636433}
   gridController: {fileID: 2452323474243788253}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 1706631759315518, guid: deeed134620a9ff45b916479814ec00f, type: 3}
   fireRate: 1

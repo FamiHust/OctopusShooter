@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class HiddenShooter : BaseShooter
 {
@@ -253,6 +254,8 @@ public class HiddenShooter : BaseShooter
         if (playRevealEffect)
         {
             PlayQuestionMarkEffect();
+            AudioManager.Instance?.PlaySFX(Const.shooterDoneSFX);
+            transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0.2f), 0.35f, 6, 0.5f);
         }
 
         isHiddenVisual = false;

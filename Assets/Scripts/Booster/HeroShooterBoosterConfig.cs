@@ -19,6 +19,9 @@ public class HeroShooterBoosterConfig : BoosterStrategyConfig
     [Tooltip("Thời gian animation bay lên / xuống")]
     public float flyDuration = 0.55f;
 
+    [Tooltip("Tỉ lệ scale của hero khi bay lên mode Hero (vd: 1.35f = phóng to 1.35 lần)")]
+    public float heroScaleMultiplier = 1.35f;
+
     [Tooltip("Thời gian camera pan + zoom đến hero")]
     public float cameraFocusDuration = 0.8f;
 

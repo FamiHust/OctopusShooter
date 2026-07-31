@@ -194,7 +194,11 @@ public class IceShooter : BaseShooter
 
     public override void CheckShooterState(object obj = null)
     {
-        if (isFrozen) return;   // Không cho kiểm tra path khi còn đông băng
+        if (isFrozen)
+        {
+            RefreshBlockedStateScale();
+            return;
+        }
         base.CheckShooterState(obj);
     }
 
@@ -229,6 +233,8 @@ public class IceShooter : BaseShooter
         hitCountDisplay?.gameObject.SetActive(false);
 
         base.CheckShooterState();
+
+        transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0.2f), 0.35f, 6, 0.5f);
     }
 
     private void SetShooterVisualsActive(bool active)
