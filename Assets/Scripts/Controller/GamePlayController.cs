@@ -239,9 +239,11 @@ public class GamePlayController : MonoBehaviour
             InGameUIManager inGameUIManager = GetInGameUIManagerCached();
             inGameUIManager?.ShowLastFourShooterPraise(remainingBeforeDisappear);
 
-            // Phát GoldEarn SFX với pitch tăng dần theo combo: 4=Great(1.0), 3=Nice(1.1), 2=Awesome(1.2), 1=Perfect(1.3)
-            float comboPitch = 1f + (4 - Mathf.Clamp(remainingBeforeDisappear, 1, 4)) * 0.1f;
-            AudioManager.Instance?.PlaySFX(Const.goldEarnSFX, comboPitch);
+            // Phát GoldEarn SFX với pitch và volume tăng dần theo combo: 4=Great(1.0, 1.0), 3=Nice(1.1, 1.15), 2=Awesome(1.2, 1.3), 1=Perfect(1.3, 1.45)
+            int comboStep = 4 - Mathf.Clamp(remainingBeforeDisappear, 1, 4);
+            float comboPitch = 1f + comboStep * 0.15f;
+            float comboVolume = 1f + comboStep * 0.15f;
+            AudioManager.Instance?.PlaySFX(Const.goldEarnSFX, comboPitch, comboVolume);
         }
 
         CancelPendingLoseTrigger();

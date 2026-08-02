@@ -1832,27 +1832,27 @@ public class TutorialManager : MonoBehaviour
             selectable.interactable = false;
         }
 
-        if (!lockNonTargetGraphicsRaycast)
+        if (lockNonTargetGraphicsRaycast)
         {
-            return;
+            for (int i = 0; i < cachedSceneGraphics.Count; i++)
+            {
+                Graphic graphic = cachedSceneGraphics[i];
+                if (graphic == null || !graphic.raycastTarget)
+                {
+                    continue;
+                }
+
+                if (IsGraphicAllowedDuringTutorial(graphic))
+                {
+                    continue;
+                }
+
+                lockedGraphicRaycastStates[graphic] = true;
+                graphic.raycastTarget = false;
+            }
         }
 
-        for (int i = 0; i < cachedSceneGraphics.Count; i++)
-        {
-            Graphic graphic = cachedSceneGraphics[i];
-            if (graphic == null || !graphic.raycastTarget)
-            {
-                continue;
-            }
-
-            if (IsGraphicAllowedDuringTutorial(graphic))
-            {
-                continue;
-            }
-
-            lockedGraphicRaycastStates[graphic] = true;
-            graphic.raycastTarget = false;
-        }
+        GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
     }
 
     private bool IsSelectableAllowedDuringTutorial(Selectable selectable)
@@ -1911,6 +1911,8 @@ public class TutorialManager : MonoBehaviour
         }
 
         lockedGraphicRaycastStates.Clear();
+
+        GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
     }
 
     private GameObject ResolveTargetByName(string targetObjectName)
