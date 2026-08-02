@@ -23,9 +23,6 @@ public class InputManager : MonoBehaviour
     private bool isPickLockedShooterModeActive = false;
     private bool isHeroShooterPickModeActive   = false;
 
-    // Auto-jump guard
-    private bool isAutoJumpingAll = false;
-
     void Awake()
     {
         Instance = this;
@@ -37,7 +34,6 @@ public class InputManager : MonoBehaviour
         GameEventHub.Instance.AddListener(GameEventType.OnSlotBarInit,         OnSlotBarInit);
         GameEventHub.Instance.AddListener(GameEventType.OnBoosterActivated,    OnBoosterActivated);
         GameEventHub.Instance.AddListener(GameEventType.OnBoosterDeactivated,  OnBoosterDeactivated);
-        GameEventHub.Instance.AddListener(GameEventType.OnShooterAddedToSlot,  OnShooterAddedToSlot_CheckAutoJump);
     }
 
     void OnDestroy()
@@ -53,7 +49,6 @@ public class InputManager : MonoBehaviour
             GameEventHub.Instance.RemoveListener(GameEventType.OnSlotBarInit,         OnSlotBarInit);
             GameEventHub.Instance.RemoveListener(GameEventType.OnBoosterActivated,    OnBoosterActivated);
             GameEventHub.Instance.RemoveListener(GameEventType.OnBoosterDeactivated,  OnBoosterDeactivated);
-            GameEventHub.Instance.RemoveListener(GameEventType.OnShooterAddedToSlot,  OnShooterAddedToSlot_CheckAutoJump);
         }
     }
 
@@ -80,6 +75,11 @@ public class InputManager : MonoBehaviour
 
     private bool ShouldBlockShooterSelectionByMechanic()
     {
+        if (BaseShooter.IsAnyHeroActive)
+        {
+            return true;
+        }
+
         if (SideRouteSeedExchangeMechanic.IsAnyExchangeInProgress)
         {
             return true;
@@ -212,7 +212,8 @@ public class InputManager : MonoBehaviour
         if (!TryRaycast(out BaseShooter shooter))
             return;
 
-        if (shooter.GetCurrentState() == ShooterState.Idle)
+        ShooterState state = shooter.GetCurrentState();
+        if (state == ShooterState.Idle || state == ShooterState.Shooting)
         {
             BoosterManager.Instance?.OnHeroShooterPicked(shooter);
         }
@@ -258,23 +259,20 @@ public class InputManager : MonoBehaviour
 
     private int GetActiveInputLayerMask()
     {
-        TutorialManager tutorialManager = TutorialManager.Instance;
-        if (tutorialManager == null || !tutorialManager.IsTutorialActive)
-        {
-            return shooterLayer.value;
-        }
+        int mask = shooterLayer.value;
 
         if (tutorialClickLayer.value != 0)
         {
-            return tutorialClickLayer.value;
+            mask |= tutorialClickLayer.value;
         }
 
-        if (tutorialManager.tutorialCamLayer.value != 0)
+        TutorialManager tutorialManager = TutorialManager.Instance;
+        if (tutorialManager != null && tutorialManager.tutorialCamLayer.value != 0)
         {
-            return tutorialManager.tutorialCamLayer.value;
+            mask |= tutorialManager.tutorialCamLayer.value;
         }
 
-        return shooterLayer.value;
+        return mask;
     }
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -304,6 +302,10 @@ public class InputManager : MonoBehaviour
             GameEventHub.Instance.Invoke(GameEventType.OnShooterJumpStart, shooter);
             GameEventHub.Instance.Invoke(GameEventType.OnShooterSelected, shooter);
             GameEventHub.Instance.Invoke(GameEventType.OnShooterAddedToSlot, null);
+        }
+        else
+        {
+            OnShooterSelectedFailed(shooter);
         }
     }
 
@@ -340,100 +342,6 @@ public class InputManager : MonoBehaviour
     private void OnShooterSelectedFailed(BaseShooter shooter)
     {
         shooter.PlayTouchLockAnimation();
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // Auto-Jump-All: Tự động jump khi số IdleGrid bằng slot trống
-    // ─────────────────────────────────────────────────────────────────
-
-    private void OnShooterAddedToSlot_CheckAutoJump(object _)
-    {
-        // Guard: không gọi lại trong khi đang auto-jump
-        if (isAutoJumpingAll)
-        {
-            return;
-        }
-        CheckAndAutoJumpAll();
-    }
-
-    /// <summary>
-    /// Kiểm tra điều kiện auto-jump-all:
-    /// Tổng số Shooter IdleGrid trên bàn == số slot trống trên SlotBar.
-    /// Nếu đúng → tự động jump tất cả lên mà không cần người chơi nhấn chọn.
-    /// </summary>
-    private void CheckAndAutoJumpAll()
-    {
-        if (slotBar == null || ShouldBlockShooterSelectionByMechanic())
-        {
-            return;
-        }
-
-        if (isPickLockedShooterModeActive || isHeroShooterPickModeActive)
-        {
-            return;
-        }
-
-        int emptySlots = slotBar.GetEmptySlotCount();
-        if (emptySlots <= 0)
-        {
-            return;
-        }
-
-        // Thu thập tất cả shooter đang IdleGrid (có thể chọn)
-        BaseShooter.FillRegisteredShooterBuffer(shooterBuffer, true);
-        int idleGridCount = 0;
-        for (int i = 0; i < shooterBuffer.Count; i++)
-        {
-            BaseShooter s = shooterBuffer[i];
-            if (s != null && s.GetCurrentState() == ShooterState.IdleGrid)
-            {
-                idleGridCount++;
-            }
-        }
-
-        // Điều kiện: số IdleGrid trên bàn == số slot trống
-        if (idleGridCount != emptySlots)
-        {
-            return;
-        }
-
-        // Guard: đánh dấu đang auto-jump để tránh vòng lặp event
-        isAutoJumpingAll = true;
-        try
-        {
-            // Jump từng shooter lên slot
-            for (int i = 0; i < shooterBuffer.Count; i++)
-            {
-                BaseShooter s = shooterBuffer[i];
-                if (s == null || s.GetCurrentState() != ShooterState.IdleGrid)
-                {
-                    continue;
-                }
-
-                if (!slotBar.AddShooter(s))
-                {
-                    break;
-                }
-
-                // Bật x2 nếu đây là shooter IdleGrid cuối cùng (giống luồng manual)
-                if (IsLastPickableShooterOnGrid(s) &&
-                    SpeedMultiplierManager.Instance != null &&
-                    !SpeedMultiplierManager.IsSpeedUpActive())
-                {
-                    SpeedMultiplierManager.Instance.ToggleSpeedUp();
-                    GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
-                }
-
-                AudioManager.Instance?.PlaySFX(Const.popUISFX);
-                GameEventHub.Instance.Invoke(GameEventType.OnShooterJumpStart, s);
-                GameEventHub.Instance.Invoke(GameEventType.OnShooterSelected, s);
-                GameEventHub.Instance.Invoke(GameEventType.OnShooterAddedToSlot, null);
-            }
-        }
-        finally
-        {
-            isAutoJumpingAll = false;
-        }
     }
 
     private void PlayLockTapSfx()

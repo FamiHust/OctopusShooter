@@ -116,6 +116,20 @@ public class TutorialManager : MonoBehaviour
     private Button currentTargetButton;
     private UnityAction currentTargetButtonClickAction;
     public GameObject GetCurrentTarget() => currentTarget;
+
+    /// <summary>
+    /// Trả về true nếu tutorial đang active VÀ selectable này đang bị lock (không phải target hiện tại).
+    /// Dùng để guard các chỗ tự ý set interactable từ bên ngoài TutorialManager.
+    /// </summary>
+    public bool IsSelectableLockedByTutorial(Selectable selectable)
+    {
+        if (!isTutorialActive || selectable == null)
+        {
+            return false;
+        }
+        return lockedSelectableStates.ContainsKey(selectable);
+    }
+
     private Action onTutorialCompleteCallback;
     private Transform adoptedBoosterDescriptionBgTransform;
     private Transform adoptedBoosterDescriptionBgOriginalParent;

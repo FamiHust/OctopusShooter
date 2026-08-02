@@ -29,6 +29,11 @@ public class BoosterManager : MonoBehaviour
     [Tooltip("Kéo thả tất cả BoosterStrategyConfig assets vào đây")]
     [SerializeField] private List<BoosterStrategyConfig> boosterConfigs = new List<BoosterStrategyConfig>();
 
+    [Header("Overlay Settings")]
+    [Tooltip("Kéo thả GameObject Overlay làm tối nền khi dùng Booster vào đây")]
+    [SerializeField] private GameObject boosterOverlay;
+    public GameObject BoosterOverlay => boosterOverlay;
+
     // ─── Runtime state ─────────────────────────────────────────────────
     public enum ActiveBoosterMode { None, PickLockedShooter, HeroShooter }
 
@@ -363,6 +368,32 @@ public class BoosterManager : MonoBehaviour
         }
     }
 
+    private void SetBoosterOverlayActive(bool active)
+    {
+        GameObject targetOverlay = boosterOverlay;
+        if (targetOverlay == null && InGameUIManager.Instance != null)
+        {
+            targetOverlay = InGameUIManager.Instance.BoosterOverlay;
+        }
+
+        if (targetOverlay != null)
+        {
+            targetOverlay.SetActive(active);
+            if (active)
+            {
+                var graphics = targetOverlay.GetComponentsInChildren<UnityEngine.UI.Graphic>(true);
+                for (int i = 0; i < graphics.Length; i++)
+                {
+                    graphics[i].raycastTarget = false;
+                }
+            }
+        }
+        else
+        {
+            TutorialManager.Instance?.SetDimOverlayActiveForBooster(active);
+        }
+    }
+
     // ──────────────────────────────────────────────────────────────────
     // PickLockedShooter mode
     // ──────────────────────────────────────────────────────────────────
@@ -377,7 +408,7 @@ public class BoosterManager : MonoBehaviour
         SetMainRoutePausedForBooster(true);
 
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterActivated, currentMode);
-        TutorialManager.Instance?.SetDimOverlayActiveForBooster(true);
+        SetBoosterOverlayActive(true);
         NotifyAllLockedShooters(highlight: true);
     }
 
@@ -422,7 +453,7 @@ public class BoosterManager : MonoBehaviour
         ActiveConfig   = null;
         SetMainRoutePausedForBooster(false);
 
-        TutorialManager.Instance?.SetDimOverlayActiveForBooster(false);
+        SetBoosterOverlayActive(false);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterDeactivated, null);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterButtonRefresh, null);
 
@@ -485,6 +516,9 @@ public class BoosterManager : MonoBehaviour
         => currentMode != ActiveBoosterMode.None
            && ActiveConfig?.boosterName == boosterName;
 
+    public bool IsAnyBoosterModeActive()
+        => currentMode != ActiveBoosterMode.None;
+
     public bool IsHeroShooterModeActive()
         => currentMode == ActiveBoosterMode.HeroShooter;
 
@@ -502,17 +536,51 @@ public class BoosterManager : MonoBehaviour
 
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterActivated, currentMode);
 
+        SetBoosterOverlayActive(true);
         UpdateHeroShooterSelectionUI(highlight:true);
     }
 
     /// <summary>
-    /// Update hero shooter selection UI - show glow on slots with selectable shooters (Idle state).
-    /// Only shooters in Idle state can be selected for hero mode.
+    /// Update hero shooter selection UI - show glow on slots with selectable shooters (Idle state),
+    /// highlight selectable shooters above the booster overlay.
     /// </summary>
     private void UpdateHeroShooterSelectionUI(bool highlight)
     {
+        TutorialManager tutMgr = TutorialManager.Instance;
+
         if (slotBar != null)
+        {
             slotBar.ToggleHeroShooterSelectionGlow(highlight);
+
+            List<BaseShooter> shootersInSlot = slotBar.GetAllShooters();
+            if (shootersInSlot != null)
+            {
+                for (int i = 0; i < shootersInSlot.Count; i++)
+                {
+                    BaseShooter s = shootersInSlot[i];
+                    if (s == null) continue;
+
+                    if (highlight)
+                    {
+                        ShooterState state = s.GetCurrentState();
+                        if (state == ShooterState.Idle || state == ShooterState.Shooting)
+                        {
+                            s.PlayBoosterHighlightAnimation();
+                            tutMgr?.HighlightGameObjectForBooster(s.gameObject);
+                        }
+                    }
+                    else
+                    {
+                        s.StopBoosterHighlightAnimation();
+                    }
+                }
+            }
+        }
+
+        if (!highlight)
+        {
+            tutMgr?.RestoreBoosterHighlights();
+        }
     }
 
     public void OnHeroShooterPicked(BaseShooter shooter)
@@ -531,7 +599,7 @@ public class BoosterManager : MonoBehaviour
 
         HeroShooterBoosterConfig cfg = heroShooterCfg;
 
-        // Exit mode first — input returns to normal immediately
+        // Exit mode first — input returns to normal immediately & overlay turns off
         ExitHeroShooterMode(completed: false);
 
         // Kick off the hero sequence (camera, fly, shoot, return)
@@ -553,8 +621,9 @@ public class BoosterManager : MonoBehaviour
         ActiveConfig      = null;
         SetMainRoutePausedForBooster(false);
 
-        // Clear glow VFX from all potential targets
+        // Clear glow VFX, highlights and turn off overlay
         UpdateHeroShooterSelectionUI(highlight: false);
+        SetBoosterOverlayActive(false);
 
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterDeactivated, null);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterButtonRefresh, null);

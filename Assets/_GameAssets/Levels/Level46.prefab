@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 406188627980047428}
   - component: {fileID: 3358360514411367518}
   m_Layer: 12
-  m_Name: Shooter_ 19_COBALT_BLUE
+  m_Name: Shooter_22_BLUE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -292,7 +292,7 @@ GameObject:
   - component: {fileID: 8543735301945106376}
   - component: {fileID: 2232986424570019571}
   m_Layer: 12
-  m_Name: Shooter_ 17_AQUA
+  m_Name: Shooter_20_AQUA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3240,6 +3240,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 4982355217606880}
   glowDeckVFX: {fileID: 198217492993817196}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &1079629739392193
 GameObject:
   m_ObjectHideFlags: 0
@@ -3888,7 +3894,7 @@ GameObject:
   - component: {fileID: 4856360845552449}
   - component: {fileID: 6818411751711909091}
   m_Layer: 6
-  m_Name: Wall_r4_c2
+  m_Name: Wall_4_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4074,7 +4080,7 @@ GameObject:
   - component: {fileID: 1647245880007756677}
   - component: {fileID: 4442446035635135310}
   m_Layer: 6
-  m_Name: Tunel_r2_c3
+  m_Name: Wall_2_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4691,13 +4697,64 @@ MonoBehaviour:
   - {fileID: 3832404327660211912}
   - {fileID: 3358360514411367518}
   - {fileID: 9163207902977387818}
-  tunnelList: []
+  tunnelList:
+  - {fileID: 4442446035635135310}
+  - {fileID: 1144105629828575121}
+  - {fileID: 4301803421957509824}
+  - {fileID: 1282522134262846169}
+  - {fileID: 2763927397881538314}
+  - {fileID: 9076034409856470664}
+  - {fileID: 404120156345308202}
   listColor: 090000000d0000000600000001000000020000000200000006000000000000000200000002000000000000000b0000000900000000000000030000000b00000001000000040000000300000006000000080000000600000001000000040000000d0000000300000004000000000000000b00000003000000010000000600000003000000040000000800000008000000000000000300000006000000000000000b00000008000000
   gridController: {fileID: 9208345549288919046}
   conveyorMeshFilter: {fileID: 0}
-  conveyorMeshList: []
+  conveyorMeshList:
+  - {fileID: 4300000, guid: 8d7301b02ef5b2d478d69b760b5ee5ca, type: 2}
+  - {fileID: 4300000, guid: 782140edf52ae6f4e8c9273d8b90a652, type: 2}
+  - {fileID: 4300000, guid: 089eaea8954e6054b90a89bc9a9d6c61, type: 2}
+  - {fileID: 4300000, guid: 298d294e4b3b93041b03d59ac30992c0, type: 2}
+  - {fileID: 4300000, guid: 72d15192aa3517b44b558d7860614754, type: 2}
+  - {fileID: 4300000, guid: 5eea626db8fbc824ba73545588b2d2e4, type: 2}
+  - {fileID: 4300000, guid: 396f9f4bbba89b54a9642a768dcbf74e, type: 2}
+  - {fileID: 4300000, guid: 91817d34a8e3d3641bb252f63d19f149, type: 2}
+  - {fileID: 4300000, guid: 5af9542fff67bf842b51e77c8918a442, type: 2}
+  - {fileID: 4300000, guid: d9808b857b8c03f4d8d96a2df5efedac, type: 2}
+  - {fileID: 4300000, guid: f802bdd7a11db344e8f7985c4133ec0a, type: 2}
+  - {fileID: 4300000, guid: 106dd035ef8024c439abad60b0a2c944, type: 2}
+  - {fileID: 4300000, guid: bdafe27640bb2c445af04754458ab621, type: 2}
+  - {fileID: 4300000, guid: bbfca4a71aa4d1845bd63dde3bb5c633, type: 2}
+  - {fileID: 4300000, guid: 3603007da4904004c82679a4b8867947, type: 2}
+  - {fileID: 4300000, guid: 3ce33f161b240b2408d2a48e95601318, type: 2}
+  - {fileID: 4300000, guid: 5c4f51a2c4db3584d93bd5a179a1a1c0, type: 2}
+  - {fileID: 4300000, guid: c715bebf5864f2449bd4f515e6ae3306, type: 2}
+  - {fileID: 4300000, guid: 21d2db63022932e488624c3a2ba8ae1e, type: 2}
+  - {fileID: 4300000, guid: 26cdeeb0531487941a55871a20954f49, type: 2}
+  - {fileID: 4300000, guid: 52be0945ca548324984f8592f65174a7, type: 2}
+  - {fileID: 4300000, guid: 706062c058771864ca7dd893f3fb06ca, type: 2}
   mapMeshFilter: {fileID: 33516774788473354}
   mapMeshList:
+  - {fileID: 4300000, guid: 8d7301b02ef5b2d478d69b760b5ee5ca, type: 2}
+  - {fileID: 4300000, guid: 782140edf52ae6f4e8c9273d8b90a652, type: 2}
+  - {fileID: 4300000, guid: 089eaea8954e6054b90a89bc9a9d6c61, type: 2}
+  - {fileID: 4300000, guid: 298d294e4b3b93041b03d59ac30992c0, type: 2}
+  - {fileID: 4300000, guid: 72d15192aa3517b44b558d7860614754, type: 2}
+  - {fileID: 4300000, guid: 5eea626db8fbc824ba73545588b2d2e4, type: 2}
+  - {fileID: 4300000, guid: 396f9f4bbba89b54a9642a768dcbf74e, type: 2}
+  - {fileID: 4300000, guid: 91817d34a8e3d3641bb252f63d19f149, type: 2}
+  - {fileID: 4300000, guid: 5af9542fff67bf842b51e77c8918a442, type: 2}
+  - {fileID: 4300000, guid: d9808b857b8c03f4d8d96a2df5efedac, type: 2}
+  - {fileID: 4300000, guid: f802bdd7a11db344e8f7985c4133ec0a, type: 2}
+  - {fileID: 4300000, guid: 106dd035ef8024c439abad60b0a2c944, type: 2}
+  - {fileID: 4300000, guid: bdafe27640bb2c445af04754458ab621, type: 2}
+  - {fileID: 4300000, guid: bbfca4a71aa4d1845bd63dde3bb5c633, type: 2}
+  - {fileID: 4300000, guid: 3603007da4904004c82679a4b8867947, type: 2}
+  - {fileID: 4300000, guid: 3ce33f161b240b2408d2a48e95601318, type: 2}
+  - {fileID: 4300000, guid: 5c4f51a2c4db3584d93bd5a179a1a1c0, type: 2}
+  - {fileID: 4300000, guid: c715bebf5864f2449bd4f515e6ae3306, type: 2}
+  - {fileID: 4300000, guid: 21d2db63022932e488624c3a2ba8ae1e, type: 2}
+  - {fileID: 4300000, guid: 26cdeeb0531487941a55871a20954f49, type: 2}
+  - {fileID: 4300000, guid: 52be0945ca548324984f8592f65174a7, type: 2}
+  - {fileID: 4300000, guid: 706062c058771864ca7dd893f3fb06ca, type: 2}
   - {fileID: 4300000, guid: 1ae8f74309795344ca261a5fcd7a811c, type: 2}
   - {fileID: 4300000, guid: 0109d9c82b6343d43b7ad733e201940b, type: 2}
   - {fileID: 4300000, guid: f899fb9d73a7c64409c7c3021d66854b, type: 2}
@@ -4748,13 +4805,25 @@ MonoBehaviour:
   - {fileID: 4300000, guid: 02ed93488c2d17040b5df4171de9f3ad, type: 2}
   - {fileID: 4300000, guid: 77466fba754988948adeaf9a3f19784f, type: 2}
   - {fileID: 4300000, guid: ab8e02e1a1ba3e5418de5f0c34ce0b64, type: 2}
+  - {fileID: 4300000, guid: 6eed771d2cb447e4885fcf967ff1b1bb, type: 2}
+  - {fileID: 4300000, guid: 6bf72c382eb9542479e69646627ed012, type: 2}
+  - {fileID: 4300000, guid: cd7dde6249ee17546aeb66958002f7af, type: 2}
+  - {fileID: 4300000, guid: a9c8bc7752fb85346bfdada938cb7ec4, type: 2}
+  - {fileID: 4300000, guid: a5ce77ed755f60841aa4c18f4e9b94ae, type: 2}
+  - {fileID: 4300000, guid: 66a50394777e4f34f9dca4a22f226bbb, type: 2}
+  - {fileID: 4300000, guid: b3c8b04806f3412468eee5e989ea3bda, type: 2}
+  - {fileID: 4300000, guid: 19224db184ba2ee468e8769c266cb032, type: 2}
+  - {fileID: 4300000, guid: 6c6851c5342f9ae488bf4f5082718acf, type: 2}
+  - {fileID: 4300000, guid: 7822ec55b43e0174e8f30f68ee23a14b, type: 2}
+  - {fileID: 4300000, guid: 38ff6b3e2877ba34199963eab8aad714, type: 2}
+  - {fileID: 4300000, guid: ea2fe961dbdbfcc4ab04d4e688e02703, type: 2}
   batchShooterStateInitOnLowEnd: 1
   shooterStateBatchSizeOnLowEnd: 8
   lowEndSystemMemoryMb: 3000
   lowEndProcessorCount: 4
   data:
-    countMainRow: 0
-    countSideRows: 
+    countMainRow: 100
+    countSideRows: c800000078000000
 --- !u!114 &7701000156689578194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4851,7 +4920,7 @@ GameObject:
   - component: {fileID: 4496236815383925}
   - component: {fileID: 4927562227729597620}
   m_Layer: 6
-  m_Name: Wall_r4_c5
+  m_Name: Wall_4_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4985,7 +5054,7 @@ GameObject:
   - component: {fileID: 4320992183558854}
   - component: {fileID: 5385663917336349351}
   m_Layer: 6
-  m_Name: Wall_r1_c0
+  m_Name: Wall_1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5178,7 +5247,7 @@ GameObject:
   - component: {fileID: 4540203303017176}
   - component: {fileID: 7600961872309060831}
   m_Layer: 6
-  m_Name: Wall_r0_c0
+  m_Name: Wall_0_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5433,7 +5502,7 @@ GameObject:
   - component: {fileID: 6047644228693375487}
   - component: {fileID: 2517166781596079204}
   m_Layer: 12
-  m_Name: Shooter_ 10_YELLOW
+  m_Name: Shooter_11_YELLOW
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5699,7 +5768,7 @@ GameObject:
   - component: {fileID: 4934003252175842}
   - component: {fileID: 2336970642925468034}
   m_Layer: 6
-  m_Name: Wall_r5_c2
+  m_Name: Wall_5_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8157,7 +8226,7 @@ GameObject:
   - component: {fileID: 4594676573846854}
   - component: {fileID: 3306855878588546029}
   m_Layer: 6
-  m_Name: Wall_r2_c0
+  m_Name: Wall_2_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8470,7 +8539,7 @@ GameObject:
   - component: {fileID: 4885901152857587}
   - component: {fileID: 2865326052235345866}
   m_Layer: 6
-  m_Name: Wall_r4_c1
+  m_Name: Wall_4_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10980,7 +11049,7 @@ GameObject:
   - component: {fileID: 1271881230884189803}
   - component: {fileID: 4555182117965055427}
   m_Layer: 12
-  m_Name: Shooter_ 9_GREEN
+  m_Name: Shooter_10_GREEN
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11346,7 +11415,7 @@ GameObject:
   - component: {fileID: 4568198993725111}
   - component: {fileID: 4479118918307757848}
   m_Layer: 6
-  m_Name: Wall_r3_c-1
+  m_Name: Wall_3_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11396,7 +11465,7 @@ GameObject:
   - component: {fileID: 4768045197400169}
   - component: {fileID: 139036590057573864}
   m_Layer: 6
-  m_Name: Wall_r4_c4
+  m_Name: Wall_4_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14013,7 +14082,7 @@ GameObject:
   - component: {fileID: 4073659355375224}
   - component: {fileID: 7010111057777231327}
   m_Layer: 6
-  m_Name: Wall_r5_c4
+  m_Name: Wall_5_5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14151,7 +14220,7 @@ GameObject:
   - component: {fileID: 3651979552890344550}
   - component: {fileID: 8805767198200046602}
   m_Layer: 12
-  m_Name: Shooter_ 13_PURPLE
+  m_Name: Shooter_15_PURPLE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14585,7 +14654,7 @@ GameObject:
   - component: {fileID: 6969237495284232101}
   - component: {fileID: 8817520196717828181}
   m_Layer: 12
-  m_Name: Shooter_ 7_ORANGE
+  m_Name: Shooter_8_ORANGE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14771,7 +14840,7 @@ GameObject:
   - component: {fileID: 4017653826785759}
   - component: {fileID: 482375998884595610}
   m_Layer: 6
-  m_Name: Wall_r2_c5
+  m_Name: Wall_2_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14821,7 +14890,7 @@ GameObject:
   - component: {fileID: 4557239615597978}
   - component: {fileID: 1996693155712591293}
   m_Layer: 6
-  m_Name: Wall_r0_c-1
+  m_Name: Wall_0_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14993,7 +15062,7 @@ GameObject:
   - component: {fileID: 4759353045351185}
   - component: {fileID: 4741002691419961305}
   m_Layer: 6
-  m_Name: Wall_r5_c3
+  m_Name: Wall_5_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15411,7 +15480,7 @@ GameObject:
   - component: {fileID: 4772500285428653}
   - component: {fileID: 5421924460590074232}
   m_Layer: 6
-  m_Name: Wall_r3_c0
+  m_Name: Wall_3_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15888,7 +15957,7 @@ GameObject:
   - component: {fileID: 4427684399028575}
   - component: {fileID: 6231943155574435385}
   m_Layer: 6
-  m_Name: Wall_r2_c-1
+  m_Name: Wall_2_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16052,7 +16121,7 @@ GameObject:
   - component: {fileID: 8794110623733345245}
   - component: {fileID: 3533478155553379315}
   m_Layer: 12
-  m_Name: Shooter_ 4_GRAY
+  m_Name: Shooter_4_GRAY
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16610,7 +16679,7 @@ GameObject:
   - component: {fileID: 1917591706282922803}
   - component: {fileID: 8417490521968121484}
   m_Layer: 12
-  m_Name: Shooter_ 12_BROWN
+  m_Name: Shooter_14_BROWN
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16827,7 +16896,7 @@ GameObject:
   - component: {fileID: 4429291274465278}
   - component: {fileID: 2063648661848679122}
   m_Layer: 6
-  m_Name: Wall_r1_c-1
+  m_Name: Wall_1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17458,7 +17527,7 @@ GameObject:
   - component: {fileID: 4388508840946419}
   - component: {fileID: 3470055666840490123}
   m_Layer: 6
-  m_Name: Wall_r3_c5
+  m_Name: Wall_3_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17649,7 +17718,7 @@ GameObject:
   - component: {fileID: 7702093273273767695}
   - component: {fileID: 3975890334622997098}
   m_Layer: 12
-  m_Name: Shooter_ 8_COBALT_BLUE
+  m_Name: Shooter_9_BLUE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17804,7 +17873,7 @@ GameObject:
   - component: {fileID: 4601655053379072}
   - component: {fileID: 1449238698868203000}
   m_Layer: 6
-  m_Name: Wall_r5_c0
+  m_Name: Wall_5_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18396,6 +18465,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 4634340684426899}
   glowDeckVFX: {fileID: 198223342944027171}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &1558077543817292
 GameObject:
   m_ObjectHideFlags: 0
@@ -18471,7 +18546,7 @@ GameObject:
   - component: {fileID: 2893758072758875927}
   - component: {fileID: 5194080460502119742}
   m_Layer: 12
-  m_Name: Shooter_ 2_PURPLE
+  m_Name: Shooter_2_PURPLE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18626,7 +18701,7 @@ GameObject:
   - component: {fileID: 4171267967849273}
   - component: {fileID: 2676062029643818329}
   m_Layer: 6
-  m_Name: Wall_r5_c1
+  m_Name: Wall_5_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18876,7 +18951,7 @@ GameObject:
   - component: {fileID: 4833074295339032}
   - component: {fileID: 7182340203963001164}
   m_Layer: 6
-  m_Name: Wall_r4_c3
+  m_Name: Wall_4_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21310,7 +21385,7 @@ GameObject:
   - component: {fileID: 4995955603346902}
   - component: {fileID: 205801076852973989}
   m_Layer: 6
-  m_Name: Wall_r4_c0
+  m_Name: Wall_4_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21916,7 +21991,7 @@ GameObject:
   - component: {fileID: 5866319665835610835}
   - component: {fileID: 9163207902977387818}
   m_Layer: 12
-  m_Name: Shooter_ 20_RED
+  m_Name: Shooter_23_RED
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22817,7 +22892,7 @@ GameObject:
   - component: {fileID: 4537854237581899327}
   - component: {fileID: 7843916353166991292}
   m_Layer: 12
-  m_Name: Shooter_ 15_GREEN
+  m_Name: Shooter_17_GREEN
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25773,7 +25848,7 @@ GameObject:
   - component: {fileID: 4464222171738608}
   - component: {fileID: 3489992415902377847}
   m_Layer: 6
-  m_Name: Wall_r5_c5
+  m_Name: Wall_5_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26645,7 +26720,7 @@ GameObject:
   - component: {fileID: 4878569188688841}
   - component: {fileID: 5647338104304345787}
   m_Layer: 6
-  m_Name: Wall_r5_c-1
+  m_Name: Wall_5_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29369,6 +29444,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 4800079678446793}
   glowDeckVFX: {fileID: 198974892605989247}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &1839123352749505
 GameObject:
   m_ObjectHideFlags: 0
@@ -32112,7 +32193,7 @@ GameObject:
   - component: {fileID: 4373445306067143}
   - component: {fileID: 9168859272179433615}
   m_Layer: 6
-  m_Name: Wall_r1_c5
+  m_Name: Wall_1_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32224,7 +32305,7 @@ GameObject:
   - component: {fileID: 2384489899517735919}
   - component: {fileID: 1497547643849118062}
   m_Layer: 12
-  m_Name: Shooter_ 3_AQUA
+  m_Name: Shooter_3_AQUA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32412,7 +32493,7 @@ GameObject:
   - component: {fileID: 8779555579082991126}
   - component: {fileID: 2134702162495691890}
   m_Layer: 12
-  m_Name: Shooter_ 5_COBALT_BLUE
+  m_Name: Shooter_5_BLUE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32958,7 +33039,7 @@ GameObject:
   - component: {fileID: 4839121316279980}
   - component: {fileID: 8645789599935366259}
   m_Layer: 6
-  m_Name: Wall_r4_c-1
+  m_Name: Wall_4_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33310,7 +33391,7 @@ GameObject:
   - component: {fileID: 4128598755179559}
   - component: {fileID: 6054279250956960824}
   m_Layer: 6
-  m_Name: Wall_r0_c5
+  m_Name: Wall_0_6
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -33393,7 +33474,7 @@ GameObject:
   - component: {fileID: 3475221649408694811}
   - component: {fileID: 3832404327660211912}
   m_Layer: 12
-  m_Name: Shooter_ 18_WHITE
+  m_Name: Shooter_21_WHITE
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -35987,6 +36068,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 4656508350010105}
   glowDeckVFX: {fileID: 198646657465196178}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &1964091563317301
 GameObject:
   m_ObjectHideFlags: 0

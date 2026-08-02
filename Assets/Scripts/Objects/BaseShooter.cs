@@ -176,6 +176,7 @@ public class BaseShooter : MonoBehaviour
     // ─── Count text tracking ──────────────────────────────────────────
     private Vector3 countTextOffset = Vector3.zero; // Offset từ shooter
     private Quaternion countTextRotationOffset = Quaternion.identity;
+    private Vector2 defaultCountTextPivot = new Vector2(0.5f, 0.5f);
     private bool isCountTextInitialized = false;
 
     // ─── Hero booster mode ────────────────────────────────────────────
@@ -664,7 +665,6 @@ public class BaseShooter : MonoBehaviour
         {
             return;
         }
-
         Material sourceMaterial = mesh.sharedMaterial;
         if (sourceMaterial == null)
         {
@@ -1486,6 +1486,10 @@ public class BaseShooter : MonoBehaviour
         countTextOffset = countTextGO.transform.localPosition;
         originTextRotation = countTextGO.transform.rotation;
         countTextRotationOffset = Quaternion.Inverse(transform.rotation) * originTextRotation;
+        if (countTextGO.rectTransform != null)
+        {
+            defaultCountTextPivot = countTextGO.rectTransform.pivot;
+        }
         isCountTextInitialized = true;
     }
 
@@ -1828,6 +1832,34 @@ public class BaseShooter : MonoBehaviour
         UpdateStateScale(currentState);
     }
 
+    public Vector3 GetTargetStateScale(ShooterState state)
+    {
+        CacheBaseLocalScaleIfNeeded();
+
+        if (state != ShooterState.Lock && state != ShooterState.Frozen && state != ShooterState.IdleGrid)
+        {
+            return baseLocalScale;
+        }
+
+        bool isPickLockedActive = BoosterManager.Instance != null && BoosterManager.Instance.IsPickLockedShooterModeActive();
+
+        bool isBlocked;
+        if (state == ShooterState.Lock)
+        {
+            isBlocked = !isPickLockedActive;
+        }
+        else if (state == ShooterState.Frozen)
+        {
+            isBlocked = IsCurrentlyBlockedOnGrid();
+        }
+        else
+        {
+            isBlocked = false;
+        }
+
+        return isBlocked ? (baseLocalScale * blockedStateScaleMultiplier) : baseLocalScale;
+    }
+
     private void UpdateStateScale(ShooterState newState)
     {
         // Only apply blocked/unblocked scaling while on the Grid.
@@ -1846,23 +1878,7 @@ public class BaseShooter : MonoBehaviour
 
         stateScaleTween?.Kill();
 
-        bool isPickLockedActive = BoosterManager.Instance != null && BoosterManager.Instance.IsPickLockedShooterModeActive();
-
-        bool isBlocked;
-        if (newState == ShooterState.Lock)
-        {
-            isBlocked = !isPickLockedActive;
-        }
-        else if (newState == ShooterState.Frozen)
-        {
-            isBlocked = IsCurrentlyBlockedOnGrid();
-        }
-        else
-        {
-            isBlocked = false;
-        }
-
-        Vector3 targetScale = isBlocked ? (baseLocalScale * blockedStateScaleMultiplier) : baseLocalScale;
+        Vector3 targetScale = GetTargetStateScale(newState);
 
         if (previousState == ShooterState.Empty || !Application.isPlaying || !gameObject.activeInHierarchy)
         {
@@ -1873,6 +1889,23 @@ public class BaseShooter : MonoBehaviour
             float dur = GetEffectiveAnimDuration(stateScaleTweenDuration);
             stateScaleTween = transform.DOScale(targetScale, dur).SetEase(Ease.OutQuad);
         }
+    }
+
+    /// <summary>
+    /// Plays scale punch animation when a shooter state changes (unblocked, revealed, unfrozen).
+    /// Ensures scale immediately resets to the correct target scale for its current blocked/unblocked state
+    /// before DOPunchScale runs, ensuring the punch completes at the proper scale (0.85 if blocked, 1.0 if free).
+    /// </summary>
+    public void PlayUnblockScalePunch(Vector3 punchAmount, float duration = 0.35f, int vibrato = 6, float elasticity = 0.5f)
+    {
+        stateScaleTween?.Kill();
+        stateScaleTween = null;
+        transform.DOKill(complete: false);
+
+        Vector3 targetScale = GetTargetStateScale(currentState);
+        transform.localScale = targetScale;
+
+        transform.DOPunchScale(punchAmount, duration, vibrato, elasticity);
     }
 
     private void StartIdleLogic()
@@ -3144,9 +3177,7 @@ public class BaseShooter : MonoBehaviour
         if (isInHeroMode)
         {
             // Camera return, then normal disappear
-            isInHeroMode = false;
             isHeroReturning = false;
-            activeHeroCount = Mathf.Max(0, activeHeroCount - 1);
             Camera cam = _heroCamera != null ? _heroCamera : Camera.main;
 
             float returnDur = GetEffectiveAnimDuration(heroCfg.cameraReturnDuration);
@@ -3210,7 +3241,15 @@ public class BaseShooter : MonoBehaviour
                 }
             }
 
-            sequence.OnComplete(() => SetState(ShooterState.Disappear));
+            sequence.OnComplete(() =>
+            {
+                if (isInHeroMode)
+                {
+                    isInHeroMode = false;
+                    activeHeroCount = Mathf.Max(0, activeHeroCount - 1);
+                }
+                SetState(ShooterState.Disappear);
+            });
         }
         else
         {
@@ -3291,6 +3330,9 @@ public class BaseShooter : MonoBehaviour
         ResetRecoilPoseImmediate();
         ReleaseMagicStoneComboShooterVfx();
         AudioManager.Instance?.PlaySFX(Const.shooterDoneSFX);
+
+        Slot parentSlot = GetComponentInParent<Slot>();
+
         slotBar.RemoveShooter(this);
 
         float moveDur  = GetEffectiveAnimDuration(0.2f);
@@ -3302,6 +3344,11 @@ public class BaseShooter : MonoBehaviour
         // ── STEP 1: Spawn + nhảy lên ─────────────────────
         seq.AppendCallback(() =>
         {
+            if (parentSlot != null)
+            {
+                parentSlot.PlayLandingBounce();
+            }
+
             GameObject jumpDisappearVfx = GetJumpDisappearParticle();
             if (jumpDisappearVfx != null)
             {
@@ -3415,6 +3462,9 @@ public class BaseShooter : MonoBehaviour
                     transform.localPosition = new Vector3(0f, slotLandingYOffset, 0f);
                     transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
                     targetParent.SetShooter(this);
+
+                    targetParent.PlayLandingBounce();
+                    PlayLandingBounceAnimation();
                 }
                 SetState(ShooterState.Idle);
                 slotBar.RegisterShooter(this);
@@ -3437,6 +3487,19 @@ public class BaseShooter : MonoBehaviour
     protected virtual bool ShouldRunJumpTweenUnscaled()
     {
         return false;
+    }
+
+    protected void PlayLandingBounceAnimation()
+    {
+        float bounceDur = GetEffectiveAnimDuration(0.25f);
+        bool isUnscaled = ShouldRunJumpTweenUnscaled();
+
+        Tween posPunch = transform.DOPunchPosition(new Vector3(0f, -0.04f, 0f), bounceDur, 1, 0.5f);
+
+        if (isUnscaled)
+        {
+            posPunch.SetUpdate(true);
+        }
     }
 
     protected virtual void OnJumpStartToDeck(Vector3 jumpVfxPosition, Quaternion jumpVfxRotation)
@@ -4227,11 +4290,13 @@ public class BaseShooter : MonoBehaviour
         float camFocusDur = GetEffectiveAnimDuration(cfg.cameraFocusDuration);
         float scaleMul = (cfg != null && cfg.heroScaleMultiplier > 0f) ? cfg.heroScaleMultiplier : 1.35f;
         Vector3 targetHeroScale = heroSlotLocalScale * scaleMul;
-
         // 1. HIỆP 1: Hero nảy lên vị trí cao nhất trước (kèm scale dần lên)
         seq.Append(transform.DOMove(flyDest, flyDur).SetEase(Ease.OutQuad));
         seq.Join(transform.DOScale(targetHeroScale, flyDur).SetEase(Ease.OutQuad));
-
+        if (countTextGO != null && countTextGO.rectTransform != null)
+        {
+            seq.Join(countTextGO.rectTransform.DOPivotY(0.45f, flyDur).SetEase(Ease.OutQuad));
+        }
         // 2. HIỆP 2: SAU KHI Hero lên tới đỉnh, Camera mới bắt đầu hành động
         float cameraOffsetY = GetHeroCameraFocusOffsetY(cfg);
         float targetCamLocalY = heroOrigCamLocalPos.y + cameraOffsetY;
@@ -4310,11 +4375,6 @@ public class BaseShooter : MonoBehaviour
     {
         if (isHeroReturning) return;
         isHeroReturning = true;
-        if (isInHeroMode)
-        {
-            isInHeroMode = false;
-            activeHeroCount = Mathf.Max(0, activeHeroCount - 1);
-        }
 
         Camera cam = _heroCamera != null ? _heroCamera : Camera.main;
 
@@ -4388,18 +4448,35 @@ public class BaseShooter : MonoBehaviour
         seq.Join(transform.DOJump(targetReturnPos, 1.5f, 1, returnDur).SetEase(Ease.InOutQuad));
         seq.Join(transform.DOScale(heroSlotLocalScale, returnDur).SetEase(Ease.InOutQuad));
         seq.Join(transform.DOLocalRotate(new Vector3(0f, 180f, 0f), returnDur).SetEase(Ease.InOutQuad));
+        if (countTextGO != null && countTextGO.rectTransform != null)
+        {
+            seq.Join(countTextGO.rectTransform.DOPivotY(defaultCountTextPivot.y, returnDur).SetEase(Ease.InOutQuad));
+        }
 
         seq.OnComplete(() =>
         {
+            if (isInHeroMode)
+            {
+                isInHeroMode = false;
+                activeHeroCount = Mathf.Max(0, activeHeroCount - 1);
+            }
             isHeroReturning = false;
 
             if (heroSlotParent != null)
+            {
                 transform.SetParent(heroSlotParent);
+                Slot heroSlotComp = heroSlotParent.GetComponent<Slot>();
+                if (heroSlotComp != null)
+                {
+                    heroSlotComp.PlayLandingBounce();
+                }
+            }
 
             // Reset position, rotation & scale
             transform.localPosition = new Vector3(0f, slotLandingYOffset, 0f);
             transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             transform.localScale = heroSlotLocalScale;
+            PlayLandingBounceAnimation();
             heroSlotParent = null;
 
             // Nếu còn đạn, quay về IdleGrid; nếu hết đạn thì disappear

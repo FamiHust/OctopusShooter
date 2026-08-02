@@ -132,8 +132,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -2687,8 +2690,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -13689,8 +13695,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -13850,8 +13859,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -14116,8 +14128,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -20093,8 +20108,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -29834,8 +29852,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -30288,6 +30309,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 4676827519039141916}
   glowDeckVFX: {fileID: 5438886822989758027}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &2882499836272919145
 GameObject:
   m_ObjectHideFlags: 0
@@ -31210,8 +31237,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -43193,8 +43223,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -56600,8 +56633,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -62182,8 +62218,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -62449,8 +62488,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -65166,6 +65208,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 6094445951580386158}
   glowDeckVFX: {fileID: 4028344447208353479}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &6241578391241949592
 GameObject:
   m_ObjectHideFlags: 0
@@ -71212,8 +71260,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -77526,6 +77577,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 6256838019823774482}
   glowDeckVFX: {fileID: 8417065191789178868}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &7841882130337834444
 GameObject:
   m_ObjectHideFlags: 0
@@ -77841,8 +77898,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -78173,8 +78233,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20
@@ -83313,6 +83376,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotPosition: {fileID: 7300619772978510532}
   glowDeckVFX: {fileID: 3747452159626393000}
+  enableWaveMotion: 1
+  waveAmplitude: 0.02
+  waveSpeed: 1.8
+  landingBounceImpulse: -0.55
+  springK: 85
+  springDamping: 8.5
 --- !u!1 &8516483056318199308
 GameObject:
   m_ObjectHideFlags: 0
@@ -88923,8 +88992,11 @@ MonoBehaviour:
   alwaysKeepHiddenShooterVisible: 1
   alwaysKeepHiddenShooterShadow: 1
   currentState: 0
+  blockedStateScaleMultiplier: 0.85
+  stateScaleTweenDuration: 0.2
   slotBar: {fileID: 404447834232090786}
   gridController: {fileID: 3043335327872915721}
+  slotLandingYOffset: 0.2
   combatConfig: {fileID: 11400000, guid: a90bc0807a4507f4ca3327996bf76065, type: 2}
   bulletPrefab: {fileID: 0}
   fireRate: 20

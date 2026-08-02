@@ -80,6 +80,13 @@ public class LevelEditorWindow : EditorWindow
     private float m_ColorSummaryHeight = 70f;
     private bool m_IsResizingVerticalSplitter = false;
 
+    // Conveyor scan results
+    private List<string> m_ScanZeroMainRowNames = null;
+    private List<string> m_ScanZeroMainRowPaths = null;
+    private Vector2 m_ScanResultScrollPos;
+
+
+
     [MenuItem("FlowBlast Tools/Level Editor Window")]
     public static void OpenWindow()
     {
@@ -414,6 +421,11 @@ public class LevelEditorWindow : EditorWindow
             else
             {
                 LoadPrefabData(m_PrefabPath);
+                if (m_PrefabObj != null)
+                {
+                    AssetDatabase.OpenAsset(m_PrefabObj);
+                    EditorGUIUtility.PingObject(m_PrefabObj);
+                }
             }
         }
 
@@ -1252,6 +1264,65 @@ public class LevelEditorWindow : EditorWindow
         if (m_CountMainRow < 0) m_CountMainRow = 0;
         GUILayout.EndVertical();
 
+        // --- Scan Button ---
+        GUILayout.Space(10);
+        GUILayout.BeginHorizontal();
+        GUI.backgroundColor = new Color(0.9f, 0.6f, 0.15f);
+        if (GUILayout.Button("🔍 Quét Level Thiếu Config Hàng Chính", GUILayout.Height(28)))
+        {
+            ScanLevelsWithZeroMainRow();
+        }
+        GUI.backgroundColor = Color.white;
+        if (m_ScanZeroMainRowNames != null)
+        {
+            if (GUILayout.Button("✕ Xóa kết quả", GUILayout.Width(100), GUILayout.Height(28)))
+            {
+                m_ScanZeroMainRowNames = null;
+                m_ScanZeroMainRowPaths = null;
+            }
+        }
+        GUILayout.EndHorizontal();
+
+        // --- Scan Results ---
+        if (m_ScanZeroMainRowNames != null)
+        {
+            GUILayout.Space(4);
+            if (m_ScanZeroMainRowNames.Count == 0)
+            {
+                EditorGUILayout.HelpBox("✅ Tất cả level đã có config Hàng Chính > 0.", MessageType.Info);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox($"⚠️ {m_ScanZeroMainRowNames.Count} level chưa config Hàng Chính (= 0):", MessageType.Warning);
+                m_ScanResultScrollPos = EditorGUILayout.BeginScrollView(m_ScanResultScrollPos,
+                    GUILayout.Height(Mathf.Min(m_ScanZeroMainRowNames.Count * 26f + 8f, 160f)));
+                for (int i = 0; i < m_ScanZeroMainRowNames.Count; i++)
+                {
+                    GUILayout.BeginHorizontal(EditorStyles.helpBox);
+                    GUILayout.Label($"• {m_ScanZeroMainRowNames[i]}", GUILayout.ExpandWidth(true));
+                    GUI.backgroundColor = new Color(0.4f, 0.8f, 0.4f);
+                    if (GUILayout.Button("Load", GUILayout.Width(48), GUILayout.Height(20)))
+                    {
+                        m_PrefabPath = m_ScanZeroMainRowPaths[i];
+                        m_PrefabObj = AssetDatabase.LoadAssetAtPath<GameObject>(m_PrefabPath);
+                        if (m_LevelDB != null && m_LevelDB.listPrefab != null)
+                            m_SelectedLevelIndex = m_LevelDB.listPrefab.IndexOf(m_PrefabObj);
+                        LoadPrefabData(m_PrefabPath);
+                        if (m_PrefabObj != null)
+                        {
+                            AssetDatabase.OpenAsset(m_PrefabObj);
+                            EditorGUIUtility.PingObject(m_PrefabObj);
+                        }
+                    }
+                    GUI.backgroundColor = Color.white;
+                    GUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndScrollView();
+            }
+        }
+
+        GUILayout.Space(6);
+
         GUILayout.Space(10);
         GUILayout.Label("Các Hàng Phụ", EditorStyles.boldLabel);
         for (int i = 0; i < m_CountSideRows.Count; i++)
@@ -1273,6 +1344,32 @@ public class LevelEditorWindow : EditorWindow
         }
 
         GUILayout.Space(15);
+
+        // Total Block Count Summary
+        if (m_ListColor != null && m_ListColor.Count > 0)
+        {
+            GUILayout.Label("Tổng Số Block Trong Conveyor", EditorStyles.boldLabel);
+            GUILayout.BeginVertical(EditorStyles.helpBox);
+
+            int totalSeeds = m_ListColor.Count;
+            int totalBlocks = totalSeeds * 50;
+
+            GUIStyle totalStyle = new GUIStyle(GUI.skin.box)
+            {
+                fontSize = 13,
+                fontStyle = FontStyle.Bold,
+                alignment = TextAnchor.MiddleCenter,
+                padding = new RectOffset(12, 12, 6, 6)
+            };
+
+            GUI.backgroundColor = new Color(0.15f, 0.35f, 0.55f);
+            GUILayout.Box($"Tổng: {totalSeeds} Hạt → {totalBlocks} Block", totalStyle, GUILayout.Height(32), GUILayout.ExpandWidth(true));
+            GUI.backgroundColor = Color.white;
+
+            GUILayout.EndVertical();
+            GUILayout.Space(10);
+        }
+
         GUILayout.Label("Màu Hạt", EditorStyles.boldLabel);
 
         for (int i = 0; i < m_ListColor.Count; i++)
@@ -1310,45 +1407,66 @@ public class LevelEditorWindow : EditorWindow
         {
             m_ListColor.Add(SeedColor.Red);
         }
+    }
 
-        // Seed Color Statistics Summary (Placed at the bottom of the tab)
-        if (m_ListColor != null && m_ListColor.Count > 0)
+
+
+    private void ScanLevelsWithZeroMainRow()
+    {
+        m_ScanZeroMainRowNames = new List<string>();
+        m_ScanZeroMainRowPaths = new List<string>();
+
+        if (m_LevelDB == null || m_LevelDB.listPrefab == null || m_LevelDB.listPrefab.Count == 0)
         {
-            GUILayout.Space(15);
-            GUILayout.Label("Tổng Số Lượng Hạt", EditorStyles.boldLabel);
-            GUILayout.BeginVertical(EditorStyles.helpBox);
-            
-            var conveyorStats = m_ListColor.GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
-            
-            m_SeedStatsScrollPos = EditorGUILayout.BeginScrollView(m_SeedStatsScrollPos, true, false, GUILayout.Height(48));
-            GUILayout.BeginHorizontal();
-            GUIStyle badgeStyle = new GUIStyle(GUI.skin.box)
-            {
-                fontSize = 11,
-                fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter,
-                padding = new RectOffset(8, 8, 4, 4)
-            };
-
-            foreach (var kvp in conveyorStats.OrderBy(k => k.Key.ToString()))
-            {
-                SeedColor color = kvp.Key;
-                int seeds = kvp.Value;
-                int blocks = seeds * 50;
-
-                string badgeText = $"{color}({blocks})";
-                float textWidth = badgeStyle.CalcSize(new GUIContent(badgeText)).x;
-                float boxWidth = Mathf.Max(80f, textWidth + 12f);
-
-                Color c = ColorInfo.GetUnityColor(color);
-                GUI.backgroundColor = c;
-                GUILayout.Box(badgeText, badgeStyle, GUILayout.Width(boxWidth), GUILayout.Height(24));
-                GUI.backgroundColor = Color.white;
-            }
-            GUILayout.EndHorizontal();
-            EditorGUILayout.EndScrollView();
-            GUILayout.EndVertical();
+            EditorUtility.DisplayDialog("Thông báo", "Không tìm thấy LevelDataBase hoặc danh sách prefab trống.", "OK");
+            return;
         }
+
+        int total = m_LevelDB.listPrefab.Count;
+        try
+        {
+            for (int i = 0; i < total; i++)
+            {
+                GameObject prefabGo = m_LevelDB.listPrefab[i];
+                if (prefabGo == null) continue;
+
+                string path = AssetDatabase.GetAssetPath(prefabGo);
+                if (string.IsNullOrEmpty(path)) continue;
+
+                EditorUtility.DisplayProgressBar("Đang quét...", prefabGo.name, (float)i / total);
+
+                GameObject root = PrefabUtility.LoadPrefabContents(path);
+                if (root == null) continue;
+
+                try
+                {
+                    LevelController lc = root.GetComponent<LevelController>();
+                    if (lc == null) continue;
+
+                    var dataField = typeof(LevelController).GetField("data", BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (dataField == null) continue;
+
+                    var splineData = dataField.GetValue(lc) as LevelController.SplineData;
+                    int mainRow = splineData != null ? splineData.countMainRow : 0;
+
+                    if (mainRow == 0)
+                    {
+                        m_ScanZeroMainRowNames.Add(prefabGo.name);
+                        m_ScanZeroMainRowPaths.Add(path);
+                    }
+                }
+                finally
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+        }
+
+        Repaint();
     }
 
     private void DrawGridSizeAdjustTab()
@@ -1476,6 +1594,8 @@ public class LevelEditorWindow : EditorWindow
             EditorUtility.DisplayDialog("Lỗi", "Không thể load được nội dung của prefab: " + path, "OK");
             return;
         }
+
+        m_PrefabObj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
 
         LevelController lc = root.GetComponent<LevelController>();
         if (lc == null)
@@ -1658,6 +1778,7 @@ public class LevelEditorWindow : EditorWindow
                 }
             }
         }
+
 
         PrefabUtility.UnloadPrefabContents(root);
         m_Loaded = true;
@@ -1847,6 +1968,7 @@ public class LevelEditorWindow : EditorWindow
             };
             splineDataField.SetValue(lc, sData);
         }
+
 
         // 7. Update LevelController's tunnelList field
         var tunnelListField = typeof(LevelController).GetField("tunnelList", BindingFlags.NonPublic | BindingFlags.Instance);

@@ -224,10 +224,11 @@ public class Tunnel : MonoBehaviour
         BaseShooter shooterInList = ExtractNextShooterFromList();
         if (shooterInList == null) return;
 
-        // 2. ChÆ¡i hiá»‡u á»©ng
+        // 2. Ch\u01a1i hi\u1ec7u \u1ee9ng
         PlayReleaseVFX();
+        PlaySpawnPunchScale();
 
-        // 3. Báº­t shooter cÃ³ sáºµn, khÃ´ng Instantiate má»›i
+        // 3. B\u1eadt shooter cÃ³ sáºµn, khÃ´ng Instantiate má»›i
         BaseShooter shooter = ActivateShooterFromList(shooterInList);
         if (shooter == null) return;
 
@@ -368,6 +369,13 @@ public class Tunnel : MonoBehaviour
     private void PlayReleaseVFX()
     {
         if (releaseVFX != null) releaseVFX.Play();
+    }
+
+    private void PlaySpawnPunchScale()
+    {
+        transform.DOKill();
+        transform.localScale = Vector3.one;
+        transform.DOPunchScale(Vector3.one * 0.25f, 0.4f, 6, 0.5f);
     }
 
     private void UpdateMaterialColor()

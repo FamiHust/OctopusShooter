@@ -69,6 +69,11 @@ public class BoosterButtonPrefab : MonoBehaviour
     {
         if (config == null || strategy == null) return;
 
+        bool isAnyBoosterActive = BoosterManager.Instance != null && BoosterManager.Instance.IsAnyBoosterModeActive();
+        bool isThisBoosterActive = BoosterManager.Instance != null && BoosterManager.Instance.IsBoosterModeActive(config.boosterName);
+
+        if (isAnyBoosterActive && !isThisBoosterActive) return;
+
         bool isUnlocked = BoosterUnlockPrefs.IsBoosterUnlocked(config.boosterName);
         if (!isUnlocked) return;
 
@@ -135,12 +140,25 @@ public class BoosterButtonPrefab : MonoBehaviour
         // ── Button interactable ───────────────────────────────────────
         if (button != null)
         {
-            if (!isUnlocked)
+            bool isAnyBoosterActive = BoosterManager.Instance != null && BoosterManager.Instance.IsAnyBoosterModeActive();
+            bool isThisBoosterActive = BoosterManager.Instance != null && BoosterManager.Instance.IsBoosterModeActive(config.boosterName);
+
+            if (isAnyBoosterActive && !isThisBoosterActive)
+            {
                 button.interactable = false;
+            }
+            else if (!isUnlocked)
+            {
+                button.interactable = false;
+            }
             else if (count == 0)
+            {
                 button.interactable = true;   // luôn cho nhấn để mở popup mua
+            }
             else
+            {
                 button.interactable = canUse; // chỉ cho dùng khi đủ điều kiện
+            }
         }
 
         // ── Active highlight (2-step mode) ────────────────────────────

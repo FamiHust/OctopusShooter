@@ -175,7 +175,7 @@ public class SlotBar : MonoBehaviour
         foreach (var slot in slots)
         {
             BaseShooter shooter = slot.GetShooter();
-            bool isSelectable = shooter != null && shooter.GetCurrentState() == ShooterState.Idle;
+            bool isSelectable = shooter != null && (shooter.GetCurrentState() == ShooterState.Idle || shooter.GetCurrentState() == ShooterState.Shooting);
 
             if (isOn && isSelectable)
             {

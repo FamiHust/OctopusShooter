@@ -115,6 +115,9 @@ Shader "Custom/MobileCartoonWater_CausticsShoreCutoff"
                 v2f o;
                 float4 localPos = v.vertex;
 
+                // Position in clip space before wave displacement (anchors shadow precisely to object base)
+                float4 unwarpedClipPos = UnityObjectToClipPos(v.vertex);
+
                 float shoreFactor = 1.0 - v.uv.y; 
                 float wave = sin(v.uv.x * _WaveScale + _Time.y * _WaveSpeed) * _WaveStrength * shoreFactor;
                 localPos.z += wave;
@@ -123,7 +126,11 @@ Shader "Custom/MobileCartoonWater_CausticsShoreCutoff"
                 o.uv = v.uv;
                 o.worldPos = mul(unity_ObjectToWorld, localPos).xyz;
 
-                TRANSFER_SHADOW(o);
+                #if defined(SHADOWS_SCREEN)
+                    o._ShadowCoord = ComputeScreenPos(unwarpedClipPos);
+                #else
+                    TRANSFER_SHADOW(o);
+                #endif
                 return o;
             }
 
@@ -146,15 +153,16 @@ Shader "Custom/MobileCartoonWater_CausticsShoreCutoff"
                 float waveSlope = cos(wavePhase) * _WaveStrength * shoreFactor;
 
                 // Vector di chuyen bong theo nhip cuon cua song va do doc mat nuoc
-                float2 waveMotionOffset = float2(waveSlope, waveHeight) * 3.0;
-
-                // Tong hop dich chuyen bong
-                float2 shadowRefraction = (waveMotionOffset + distortionOffset * 10.0) * _ShadowDistortion;
+                float2 waveMotionOffset = float2(waveSlope, waveHeight);
 
                 v2f shadowInput = i;
                 #if defined(SHADOWS_SCREEN)
+                    // Scaled for screen-space UV (0..1 range) so distortion is subtle and shadow stays attached to object base
+                    float2 shadowRefraction = (waveMotionOffset * 0.05 + distortionOffset * 0.2) * 0.01 * _ShadowDistortion;
                     shadowInput._ShadowCoord.xy += shadowRefraction * shadowInput._ShadowCoord.w;
                 #else
+                    // Scaled for world space XZ offsets
+                    float2 shadowRefraction = (waveMotionOffset * 0.1 + distortionOffset) * 0.05 * _ShadowDistortion;
                     shadowInput.worldPos.xz += shadowRefraction;
                 #endif
 

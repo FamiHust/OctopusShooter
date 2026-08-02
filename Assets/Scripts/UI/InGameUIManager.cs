@@ -98,8 +98,10 @@ public class InGameUIManager : MonoBehaviour
 
     // â”€â”€â”€ Instruction panel (2-step boosters) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     [Header("Instruction Panel (2-step boosters)")]
-    [Tooltip("Panel 'Choose Any Shooter' Ä‘Ã£ táº¡o sáºµn trong scene")]
+    [Tooltip("Panel 'Choose Any Shooter' đã tạo sẵn trong scene")]
     [SerializeField] private GameObject       boosterInstructionPanel;
+    [SerializeField] private GameObject       boosterOverlay;
+    public GameObject BoosterOverlay => boosterOverlay;
     [SerializeField] private Image            boosterInstructionIcon;
     [SerializeField] private Text  boosterInstructionTitle;
     [SerializeField] private Text  boosterInstructionDesc;
@@ -1340,7 +1342,13 @@ public class InGameUIManager : MonoBehaviour
         {
             bool canNormalActivate = gamePlayController != null && gamePlayController.CanActivateMagicStoneClear();
             bool canDebugHoldActivate = gamePlayController != null && IsMagicStoneHoldDebugEnabled() && gamePlayController.CanActivateMagicStoneClearDebugBypassCost();
-            magicStoneButton.interactable = canNormalActivate || canDebugHoldActivate;
+            bool wantInteractable = canNormalActivate || canDebugHoldActivate;
+            // Guard: nếu tutorial đang lock button này, không cho phép set interactable = true để tránh race condition
+            bool blockedByTutorial = wantInteractable && (TutorialManager.Instance?.IsSelectableLockedByTutorial(magicStoneButton) ?? false);
+            if (!blockedByTutorial)
+            {
+                magicStoneButton.interactable = wantInteractable;
+            }
         }
 
         bool shouldHighlight = collected >= Mathf.Max(1, required);
@@ -1760,14 +1768,6 @@ public class InGameUIManager : MonoBehaviour
     private void ShowInstructionPanel(BoosterManager.ActiveBoosterMode mode = BoosterManager.ActiveBoosterMode.None)
     {
         if (boosterInstructionPanel == null || instrPanelRT == null) return;
-
-        if ((mode == BoosterManager.ActiveBoosterMode.PickLockedShooter ||
-             mode == BoosterManager.ActiveBoosterMode.HeroShooter) &&
-            TutorialManager.Instance != null &&
-            TutorialManager.Instance.IsTutorialActive)
-        {
-            TutorialManager.Instance.TryAdoptBoosterDescriptionBg(boosterInstructionPanel);
-        }
 
         var activeCfg = BoosterManager.Instance?.ActiveConfig;
         if (boosterInstructionIcon  != null) boosterInstructionIcon.sprite = activeCfg?.activeIcon;
