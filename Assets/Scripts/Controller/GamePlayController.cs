@@ -35,6 +35,13 @@ public class GamePlayController : MonoBehaviour
     private readonly HashSet<BaseShooter> magicStoneDeckShooterSet = new HashSet<BaseShooter>();
     private readonly List<BlockRowSeedSpawner> magicStoneMainRouteSeederBuffer = new List<BlockRowSeedSpawner>(32);
 
+    [Header("Guaranteed Win / Auto-Finish")]
+    [SerializeField, Min(0.05f)] private float autoFinishInterval = 0.2f;
+
+    private Coroutine pendingAutoFinishRoutine;
+    private bool isAutoFinishRunning;
+    private readonly List<BaseShooter> autoFinishShooterBuffer = new List<BaseShooter>(64);
+
     [Header("Magic Stone - Beam Timing")]
     [SerializeField, Min(0.02f)] private float magicStoneWaveRowInterval = 0.08f;
 
@@ -308,7 +315,10 @@ public class GamePlayController : MonoBehaviour
         if (CheckWinCondition())
         {
             TriggerWin();
+            yield break;
         }
+
+        TryTriggerGuaranteedWin();
     }
 
     private void OnShooterAddedToSlot(object data)
@@ -347,6 +357,11 @@ public class GamePlayController : MonoBehaviour
         if (CheckWinCondition())
         {
             TriggerWin();
+            yield break;
+        }
+
+        if (TryTriggerGuaranteedWin())
+        {
             yield break;
         }
 
@@ -492,6 +507,12 @@ public class GamePlayController : MonoBehaviour
     {
         gameEnded = true;
         StopPendingMagicStoneClearProcess();
+        if (pendingAutoFinishRoutine != null)
+        {
+            StopCoroutine(pendingAutoFinishRoutine);
+            pendingAutoFinishRoutine = null;
+        }
+        isAutoFinishRunning = false;
         if (pendingWinRoutine != null)
         {
             StopCoroutine(pendingWinRoutine);
@@ -566,6 +587,12 @@ public class GamePlayController : MonoBehaviour
 
         gameEnded = true;
         StopPendingMagicStoneClearProcess();
+        if (pendingAutoFinishRoutine != null)
+        {
+            StopCoroutine(pendingAutoFinishRoutine);
+            pendingAutoFinishRoutine = null;
+        }
+        isAutoFinishRunning = false;
         mainRoute?.SetTutorialPaused(true);
         if (pendingWinRoutine != null)
         {
@@ -622,6 +649,12 @@ public class GamePlayController : MonoBehaviour
     {
         SpeedMultiplierManager.ResetSpeedStatic();
         StopPendingMagicStoneClearProcess();
+        if (pendingAutoFinishRoutine != null)
+        {
+            StopCoroutine(pendingAutoFinishRoutine);
+            pendingAutoFinishRoutine = null;
+        }
+        isAutoFinishRunning = false;
         BaseShooter.ResetMagicStoneForCurrentLevel();
         ResetPendingMagicStoneCoinReward();
         cachedMagicStoneRewardUI = null;
@@ -2366,8 +2399,238 @@ public class GamePlayController : MonoBehaviour
     /// </summary>
     public bool CanUseBooster(string boosterId)
     {
+        if (isAutoFinishRunning || gameEnded) return false;
         if (BoosterManager.Instance == null) return false;
         return BoosterManager.Instance.GetCanUse(boosterId);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // GUARANTEED WIN / AUTO-FINISH
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    public bool IsAutoFinishRunning()
+    {
+        return isAutoFinishRunning;
+    }
+
+    /// <summary>
+    /// Kiểm tra xem có đủ điều kiện Guaranteed Win không:
+    /// Số slot trống trong hàng chờ >= tổng số shooter còn lại bên dưới (grid + tunnel).
+    /// </summary>
+    public bool IsGuaranteedWinPossible()
+    {
+        if (gameEnded || isAutoFinishRunning || isMagicStoneClearInProgress)
+        {
+            return false;
+        }
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive)
+        {
+            return false;
+        }
+
+        if (slotBar == null)
+        {
+            return false;
+        }
+
+        int totalSlotCount = slotBar.GetTotalSlotCount();
+        int initialTotalShooters = totalShooters > 0 ? totalShooters : (destroyedShooters + GetRemainingShooterCountBelow());
+        if (initialTotalShooters <= totalSlotCount)
+        {
+            return false;
+        }
+
+        int emptySlotCount = slotBar.GetEmptySlotCount();
+        if (emptySlotCount <= 0)
+        {
+            return false;
+        }
+
+        int remainingBelow = GetRemainingShooterCountBelow();
+        if (remainingBelow <= 0)
+        {
+            return false;
+        }
+
+        return emptySlotCount >= remainingBelow;
+    }
+
+    /// <summary>
+    /// Lấy tổng số shooter còn lại bên dưới (trên grid hoặc trong tunnel, chưa vào SlotBar).
+    /// </summary>
+    public int GetRemainingShooterCountBelow()
+    {
+        if (slotBar == null)
+        {
+            return 0;
+        }
+
+        int occupiedInSlotBar = slotBar.GetShooterCount();
+        int totalRemaining = GetRemainingShooterCountIncludingInactive();
+        return Mathf.Max(0, totalRemaining - occupiedInSlotBar);
+    }
+
+    /// <summary>
+    /// Thử kích hoạt cơ chế Guaranteed Win nếu điều kiện thỏa mãn.
+    /// </summary>
+    public bool TryTriggerGuaranteedWin()
+    {
+        if (!IsGuaranteedWinPossible())
+        {
+            return false;
+        }
+
+        StartAutoFinish();
+        return true;
+    }
+
+    public void StartAutoFinish()
+    {
+        if (isAutoFinishRunning || gameEnded)
+        {
+            return;
+        }
+
+        if (pendingAutoFinishRoutine != null)
+        {
+            StopCoroutine(pendingAutoFinishRoutine);
+            pendingAutoFinishRoutine = null;
+        }
+
+        isAutoFinishRunning = true;
+        SetInputLocked(true);
+        pendingAutoFinishRoutine = StartCoroutine(PerformAutoFinishRoutine());
+    }
+
+    private IEnumerator PerformAutoFinishRoutine()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        float timeoutTime = Time.time + 30f;
+
+        while (!gameEnded && isAutoFinishRunning && GetRemainingShooterCountBelow() > 0 && Time.time < timeoutTime)
+        {
+            if (slotBar == null || slotBar.IsFull())
+            {
+                break;
+            }
+
+            BaseShooter pickableShooter = FindNextPickableShooterForAutoFinish();
+            if (pickableShooter != null)
+            {
+                TriggerAutoPickShooter(pickableShooter);
+                yield return new WaitForSeconds(autoFinishInterval);
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.08f);
+            }
+        }
+
+        pendingAutoFinishRoutine = null;
+        isAutoFinishRunning = false;
+    }
+
+    private BaseShooter FindNextPickableShooterForAutoFinish()
+    {
+        BaseShooter.FillRegisteredShooterBuffer(autoFinishShooterBuffer, true);
+
+        // Ưu tiên shooter có màu trùng với màu seed đang có ở main route để bắn ngay
+        if (mainRoute != null)
+        {
+            List<GameObject> activeRows = mainRoute.GetActiveBlockRows();
+            if (activeRows != null && activeRows.Count > 0)
+            {
+                for (int r = 0; r < activeRows.Count; r++)
+                {
+                    GameObject rowGO = activeRows[r];
+                    if (rowGO == null) continue;
+                    BlockRowSeedSpawner seeder = rowGO.GetComponent<BlockRowSeedSpawner>();
+                    if (seeder == null || seeder.GetSeedCount() <= 0) continue;
+
+                    SeedColor rowColor = seeder.GetCurrentColor();
+                    for (int i = 0; i < autoFinishShooterBuffer.Count; i++)
+                    {
+                        BaseShooter shooter = autoFinishShooterBuffer[i];
+                        if (shooter != null && shooter.isActiveAndEnabled && shooter.GetCurrentState() == ShooterState.IdleGrid)
+                        {
+                            if (shooter.GetTargetColor() == rowColor)
+                            {
+                                return shooter;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Nếu không có shooter cùng màu hoặc không xác định được, lấy shooter IdleGrid đầu tiên
+        for (int i = 0; i < autoFinishShooterBuffer.Count; i++)
+        {
+            BaseShooter shooter = autoFinishShooterBuffer[i];
+            if (shooter != null && shooter.isActiveAndEnabled && shooter.GetCurrentState() == ShooterState.IdleGrid)
+            {
+                return shooter;
+            }
+        }
+
+        return null;
+    }
+
+    private void TriggerAutoPickShooter(BaseShooter shooter)
+    {
+        if (shooter == null || slotBar == null)
+        {
+            return;
+        }
+
+        if (!slotBar.AddShooter(shooter))
+        {
+            return;
+        }
+
+        AudioManager.Instance?.PlaySFX(Const.popUISFX);
+
+        if (IsLastPickableShooterOnGrid(shooter) &&
+            SpeedMultiplierManager.Instance != null &&
+            !SpeedMultiplierManager.IsSpeedUpActive())
+        {
+            SpeedMultiplierManager.Instance.ToggleSpeedUp();
+            GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
+        }
+
+        GameEventHub.Instance.Invoke(GameEventType.OnShooterJumpStart, shooter);
+        GameEventHub.Instance.Invoke(GameEventType.OnShooterSelected, shooter);
+        GameEventHub.Instance.Invoke(GameEventType.OnShooterAddedToSlot, null);
+    }
+
+    private bool IsLastPickableShooterOnGrid(BaseShooter selectedShooter)
+    {
+        if (selectedShooter == null)
+        {
+            return false;
+        }
+
+        BaseShooter.FillRegisteredShooterBuffer(autoFinishShooterBuffer, true);
+        for (int i = 0; i < autoFinishShooterBuffer.Count; i++)
+        {
+            BaseShooter shooter = autoFinishShooterBuffer[i];
+            if (shooter == null || shooter == selectedShooter)
+            {
+                continue;
+            }
+
+            ShooterState state = shooter.GetCurrentState();
+            if (state == ShooterState.IdleGrid ||
+                state == ShooterState.Lock ||
+                state == ShooterState.Frozen)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public void DebugForceWin()

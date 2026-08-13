@@ -40,8 +40,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4512488928647025347}
-  - component: {fileID: 6794479731448472635}
-  - component: {fileID: 4924704482972983436}
   m_Layer: 0
   m_Name: GunStand
   m_TagString: Untagged
@@ -66,36 +64,6 @@ Transform:
   - {fileID: 7509411651579830523}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6794479731448472635
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3210871649230897564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2c28c64e3b25434fbdba09da5f27593, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <Index>k__BackingField: 0
-  <Visual>k__BackingField: {fileID: 4924704482972983436}
-  <TfGun>k__BackingField: {fileID: 7509411651579830523}
-  <CurGun>k__BackingField: {fileID: 0}
---- !u!114 &4924704482972983436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3210871649230897564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 557561a8cee3b1440aeb0b5139a922ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  <GOVisual>k__BackingField: {fileID: 3210871649230897564}
-  <TimeMoveToPos>k__BackingField: 0.25
 --- !u!1001 &2349619644493684266
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -161,7 +129,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 88ca28a270dfe0549b2a06ccc1cf7a4c, type: 3}
-      propertyPath: 'm_Materials.Array.data[0]'
+      propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 4b4991a99102dfc4f9954007b6c4cc1e, type: 2}
     - target: {fileID: 919132149155446097, guid: 88ca28a270dfe0549b2a06ccc1cf7a4c, type: 3}

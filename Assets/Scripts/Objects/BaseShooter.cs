@@ -2851,7 +2851,7 @@ public class BaseShooter : MonoBehaviour
     private static bool IsMagicStoneComboFeatureUnlockedForCurrentLevel()
     {
         int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
-        return currentLevel >= 3;
+        return currentLevel >= 10;
     }
 
     private void CacheMagicStonePrefabMetadata(GameObject prefab)

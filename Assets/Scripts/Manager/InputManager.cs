@@ -86,7 +86,7 @@ public class InputManager : MonoBehaviour
         }
 
         GamePlayController gamePlayController = GamePlayController.Instance;
-        return gamePlayController != null && gamePlayController.IsMagicStoneClearRunning();
+        return gamePlayController != null && (gamePlayController.IsMagicStoneClearRunning() || gamePlayController.IsAutoFinishRunning());
     }
 
     // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

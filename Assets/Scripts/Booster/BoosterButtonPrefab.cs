@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// Component gắn trên mỗi nút booster trong UI.
 /// Trạng thái hiển thị:
 ///   • Chưa unlock  → lockedSprite, ẩn count/plus, button disabled
-///   • Unlock + count = 0 → activeIcon, hiện plusImage, ẩn count → nhấn mở buy popup
+///   • Unlock + count = 0 → inactiveIcon, hiện plusImage, ẩn count → nhấn mở buy popup
 ///   • Unlock + count ≥ 1 → activeIcon, hiện count, ẩn plus
 ///       └─ canUse = true  → nhấn dùng booster (1-step: execute; 2-step: show instruction)
 ///       └─ canUse = false → button disabled (grayed out)
@@ -111,7 +111,22 @@ public class BoosterButtonPrefab : MonoBehaviour
 
         // ── Icon ──────────────────────────────────────────────────────
         if (iconImage != null)
-            iconImage.sprite = (!isUnlocked && lockedSprite != null) ? lockedSprite : config.activeIcon;
+        {
+            if (!isUnlocked)
+            {
+                iconImage.sprite = (lockedSprite != null)
+                    ? lockedSprite
+                    : (config.inactiveIcon != null ? config.inactiveIcon : config.activeIcon);
+            }
+            else if (count <= 0)
+            {
+                iconImage.sprite = config.inactiveIcon != null ? config.inactiveIcon : config.activeIcon;
+            }
+            else
+            {
+                iconImage.sprite = config.activeIcon != null ? config.activeIcon : config.inactiveIcon;
+            }
+        }
 
         // ── Plus (buy) badge ──────────────────────────────────────────
         if (plusImage != null)

@@ -177,8 +177,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 19}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalRotation: {x: 0.000000059604645, y: -0, z: -0, w: -1}
+  m_LocalPosition: {x: 0, y: 0.9864099, z: -0.7255934}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -711,6 +711,7 @@ MonoBehaviour:
   levelData: {fileID: 11400000, guid: 45437e8bdaf808a498dbe292db75c04d, type: 2}
   mainCamera: {fileID: 97}
   levelCameraConfigurator: {fileID: 1374982358}
+  autoFinishInterval: 0.2
   magicStoneWaveRowInterval: 0.08
   magicStoneCastDropPrefab: {fileID: 3928998189374746443, guid: efdb4218ac0e9cb489cdb08a8de9c7b3, type: 3}
   magicStoneCastFixedX: 0
@@ -788,7 +789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e0c7293bca4ab4f836e59d82cf5816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speedUpMultiplier: 2
+  speedUpMultiplier: 2.5
   multiplierLerpSpeed: 8
 --- !u!4 &295676584
 Transform:

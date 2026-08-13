@@ -409,6 +409,47 @@ public class LevelEditorWindow : EditorWindow
 
         GUILayout.EndHorizontal();
 
+        // Back / Next level navigation row
+        GUILayout.BeginHorizontal();
+
+        bool hasPrev = m_LevelDB != null && m_SelectedLevelIndex > 0;
+        bool hasNext = m_LevelDB != null && m_SelectedLevelIndex >= 0 && m_SelectedLevelIndex < m_LevelDB.listPrefab.Count - 1;
+
+        GUI.enabled = hasPrev;
+        GUI.backgroundColor = new Color(0.6f, 0.4f, 0.9f, 1f);
+        if (GUILayout.Button("◀  Back Level", GUILayout.Height(28), GUILayout.Width(130)))
+        {
+            m_SelectedLevelIndex--;
+            m_PrefabObj = m_LevelDB.listPrefab[m_SelectedLevelIndex];
+            m_PrefabPath = AssetDatabase.GetAssetPath(m_PrefabObj);
+            LoadPrefabData(m_PrefabPath);
+            if (m_PrefabObj != null) { AssetDatabase.OpenAsset(m_PrefabObj); EditorGUIUtility.PingObject(m_PrefabObj); }
+        }
+        GUI.enabled = true;
+
+        // Current level indicator label
+        GUI.backgroundColor = new Color(0.18f, 0.18f, 0.18f, 1f);
+        string levelLabel = (m_LevelDB != null && m_SelectedLevelIndex >= 0)
+            ? $"Level {m_SelectedLevelIndex + 1} / {m_LevelDB.listPrefab.Count}"
+            : "—";
+        GUILayout.Box(levelLabel, new GUIStyle(GUI.skin.box) { fontSize = 12, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.white } }, GUILayout.Height(28), GUILayout.ExpandWidth(true));
+        GUI.backgroundColor = Color.white;
+
+        GUI.enabled = hasNext;
+        GUI.backgroundColor = new Color(0.6f, 0.4f, 0.9f, 1f);
+        if (GUILayout.Button("Next Level  ▶", GUILayout.Height(28), GUILayout.Width(130)))
+        {
+            m_SelectedLevelIndex++;
+            m_PrefabObj = m_LevelDB.listPrefab[m_SelectedLevelIndex];
+            m_PrefabPath = AssetDatabase.GetAssetPath(m_PrefabObj);
+            LoadPrefabData(m_PrefabPath);
+            if (m_PrefabObj != null) { AssetDatabase.OpenAsset(m_PrefabObj); EditorGUIUtility.PingObject(m_PrefabObj); }
+        }
+        GUI.enabled = true;
+        GUI.backgroundColor = Color.white;
+
+        GUILayout.EndHorizontal();
+
         GUILayout.BeginHorizontal();
         
         GUI.backgroundColor = new Color(0.4f, 0.8f, 0.4f, 1f);

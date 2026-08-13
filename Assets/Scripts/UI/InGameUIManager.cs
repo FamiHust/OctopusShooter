@@ -132,7 +132,7 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private Image magicStoneImage;
     [Tooltip("Hiển thị UI MagicStone từ level này trở lên")]
     [Min(1)]
-    [SerializeField] private int showMagicStoneUIAtLevel = 3;
+    [SerializeField] private int showMagicStoneUIAtLevel = 10;
     [Tooltip("Glow VFX khi MagicStone đủ điều kiện dùng")]
     [SerializeField] private ParticleSystem magicStoneReadyHighlight;
     [Header("Magic Stone Debug Hold")]

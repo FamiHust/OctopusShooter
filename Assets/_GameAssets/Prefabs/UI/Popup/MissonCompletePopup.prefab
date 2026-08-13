@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7064954284762926973}
-  - component: {fileID: 754421862584256610}
   m_Layer: 5
   m_Name: MissonCompletePopup
   m_TagString: Untagged
@@ -37,34 +36,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &754421862584256610
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 833175959413129234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b44ac986bb2f5c4394fcd3e28fc39e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  showDuration: 0.3
-  hideDuration: 0.25
-  scaleSize: {x: 1, y: 1, z: 1}
-  showEase: 27
-  hideEase: 26
-  canvasGroup: {fileID: 0}
-  popupTitle: {fileID: 0}
-  contentPanel: {fileID: 0}
-  closeButton: {fileID: 0}
-  useOverlay: 1
-  overlayImage: {fileID: 0}
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.7}
-  pauseGameOnShow: 1
-  autoSetupButtonAnimations: 1
-  skeletonGraphic: {fileID: 2970809373399114358}
-  autoHideDelay: 0.5
 --- !u!1 &1848021189576653253
 GameObject:
   m_ObjectHideFlags: 0

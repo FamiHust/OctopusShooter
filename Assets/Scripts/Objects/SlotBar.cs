@@ -322,6 +322,14 @@ public class SlotBar : MonoBehaviour
         return slots.Count - GetEmptySlotCount();
     }
 
+    /// <summary>
+    /// Lấy tổng số lượng slot của hàng chờ
+    /// </summary>
+    public int GetTotalSlotCount()
+    {
+        return slots != null ? slots.Count : 0;
+    }
+
     public void RemoveAvailableSlotFromQueue()
     {
         RebuildAvailableSlotsQueue();
