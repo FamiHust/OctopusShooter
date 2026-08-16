@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -20,9 +20,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GamePlayController gamePlayController;
     [Header("UI Container")]
     [SerializeField] private Transform uiContainer; // Parent cho UI instances
+    public Transform UIContainer => uiContainer;
 
     [Header("Popup Container")]
-    [SerializeField] private Transform popupContainer; // Parent cho táº¥t cáº£ popup
+    [SerializeField] private Transform popupContainer; // Parent cho tất cả popup
+    public Transform PopupContainer => popupContainer;
 
     [Header("Popup Prefabs")]
     [SerializeField] private List<GameObject> popupPrefabs = new List<GameObject>();
@@ -314,6 +316,56 @@ public class UIManager : MonoBehaviour
         {
             CancelLoadingUI2AutoHide();
         }
+    }
+
+    public bool IsLoadingActive()
+    {
+        if (currentLoadingUI != null && currentLoadingUI.activeInHierarchy)
+        {
+            LoadingUI loadingComp = currentLoadingUI.GetComponent<LoadingUI>();
+            if (loadingComp != null)
+            {
+                return loadingComp.IsLoading;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public void ExecuteAfterLoading(Action action)
+    {
+        if (action == null) return;
+
+        if (!IsLoadingActive())
+        {
+            action.Invoke();
+            return;
+        }
+
+        LoadingUI loadingComp = currentLoadingUI != null ? currentLoadingUI.GetComponent<LoadingUI>() : null;
+        if (loadingComp != null)
+        {
+            Action handler = null;
+            handler = () =>
+            {
+                loadingComp.OnLoadingFinished -= handler;
+                action.Invoke();
+            };
+            loadingComp.OnLoadingFinished += handler;
+        }
+        else
+        {
+            StartCoroutine(WaitForLoadingInactiveRoutine(action));
+        }
+    }
+
+    private IEnumerator WaitForLoadingInactiveRoutine(Action action)
+    {
+        while (currentLoadingUI != null && currentLoadingUI.activeInHierarchy)
+        {
+            yield return null;
+        }
+        action?.Invoke();
     }
 
     public void ShowLoadingAndRunNextFrame(Action action, bool autoHideLoadingUI2 = true)

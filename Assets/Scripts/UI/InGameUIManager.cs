@@ -144,9 +144,6 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private bool enableLevelDebugGestures = true;
     [SerializeField] private Graphic levelDebugTapTarget;
 
-
-
-    // â”€â”€â”€ Runtime â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private GamePlayController gamePlayController;
     private string pendingBuyBoosterId;
     private int    pendingBuyPrice;
@@ -186,15 +183,6 @@ public class InGameUIManager : MonoBehaviour
     private readonly List<GameObject> activeGameplayCoinFlyObjects = new List<GameObject>(32);
     private Tween magicStoneFillTween;
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Init (gá»i trÆ°á»›c InitLevel)
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-    /// <summary>
-    /// Khá»Ÿi táº¡o UI cho mÃ n chÆ¡i. Pháº£i gá»i trÆ°á»›c gamePlayController.InitLevel().
-    /// </summary>
-    /// 
-
     public void Init(GamePlayController controller)
     {
         gamePlayController = controller;
@@ -207,17 +195,14 @@ public class InGameUIManager : MonoBehaviour
 
         AutoUnlockBoostersByCurrentLevel();
 
-        // Init tá»«ng booster button vá»›i reference vá» manager nÃ y
         foreach (var btn in boosterButtons)
             btn?.Initialize(this);
 
-        // áº¨n/hiá»‡n booster panel
         UpdateBoosterPanelVisibility();
         UpdateTopUIVisibility();
         PrepareHardLevelVisualForCurrentLevel();
         CacheHUDShownLocalPositions();
 
-        // Cache instruction panel RT + compute slide positions
         if (boosterInstructionPanel != null)
         {
             if (instrPanelRT == null)
@@ -240,7 +225,6 @@ public class InGameUIManager : MonoBehaviour
             }
         }
 
-        // áº¨n instruction + buy popup
         boosterInstructionPanel?.SetActive(false);
         ResetLastFourPraiseState(true);
 
@@ -252,10 +236,6 @@ public class InGameUIManager : MonoBehaviour
         UpdateMagicStoneObjectiveUI();
         RefreshAllButtons();
     }
-
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    // Unity lifecycle
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     private void OnEnable()
     {
@@ -1431,6 +1411,8 @@ public class InGameUIManager : MonoBehaviour
         {
             return;
         }
+
+        AudioManager.Instance?.PlaySFX(Const.hardLevelSFX);
 
         Transform hardLevelRoot = hardLevel.transform;
         if (hardLevelRoot.childCount < 2)

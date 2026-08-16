@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
@@ -98,6 +98,7 @@ public class SplineRoute : MonoBehaviour
     private bool isTutorialPaused;
     private bool isBoosterFocusPaused;
     private bool isMechanicPaused;
+    private bool isStoryPaused;
     private readonly List<VisualCandidate> visualCandidatesBuffer = new List<VisualCandidate>(64);
     private readonly HashSet<int> selectedVisibleRowIds = new HashSet<int>();
     private int lastVisualBudgetRowCount = -1;
@@ -299,9 +300,30 @@ public class SplineRoute : MonoBehaviour
         ApplyRoutePauseState();
     }
 
+    public void SetStoryPaused(bool paused)
+    {
+        if (isStoryPaused == paused)
+        {
+            return;
+        }
+
+        isStoryPaused = paused;
+        ApplyRoutePauseState();
+    }
+
     private bool IsRoutePaused()
     {
-        return isTutorialPaused || isBoosterFocusPaused || isMechanicPaused;
+        if (isStoryPaused || isTutorialPaused || isBoosterFocusPaused || isMechanicPaused)
+        {
+            return true;
+        }
+
+        if (StoryManager.Instance != null && StoryManager.Instance.IsPlayingStory)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void ApplyRoutePauseState()

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
@@ -296,6 +296,25 @@ public class SplineController : MonoBehaviour
     public SplineRoute   GetMainRoute()  => mainRoute;
     public SplineRoute[] GetSideRoutes() => sidesRoute;
 
+    public void SetStoryPaused(bool paused)
+    {
+        if (mainRoute != null)
+        {
+            mainRoute.SetStoryPaused(paused);
+        }
+
+        if (sidesRoute != null)
+        {
+            for (int i = 0; i < sidesRoute.Length; i++)
+            {
+                if (sidesRoute[i] != null)
+                {
+                    sidesRoute[i].SetStoryPaused(paused);
+                }
+            }
+        }
+    }
+
     public bool IsAnyRefillInProgress()
     {
         return processingRowIds.Count > 0 || processingSources.Count > 0;
@@ -308,11 +327,11 @@ public class SplineController : MonoBehaviour
     public void TriggerRefill(int sideIndex, GameObject mainBlockRow)
     {
         if (mainBlockRow == null) return;
-        if (mainRoute == null || !mainRoute.ContainsRow(mainBlockRow)) return;
+        if (mainRoute == null || mainRoute.IsMovementPaused() || !mainRoute.ContainsRow(mainBlockRow)) return;
         if (sidesRoute == null || sideIndex < 0 || sideIndex >= sidesRoute.Length) return;
 
         SplineRoute source = sidesRoute[sideIndex];
-        if (source == null) return;
+        if (source == null || source.IsMovementPaused()) return;
 
         var mainSeeder = mainBlockRow.GetComponent<BlockRowSeedSpawner>();
         if (mainSeeder == null || !mainSeeder.HasEmptySlot()) return;

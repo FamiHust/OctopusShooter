@@ -667,7 +667,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -1502,6 +1502,65 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &1292098568
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1292098570}
+  - component: {fileID: 1292098569}
+  m_Layer: 0
+  m_Name: StoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1292098569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292098568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27f1eed639b3ed04885dce5a221715fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  storyList:
+  - {fileID: 2421095019425230533, guid: c70acc3025c5c68408deb4d0eeb94d3b, type: 3}
+  - {fileID: 2421095019425230533, guid: 82903860b2ede41409c5b22d33d478be, type: 3}
+  - {fileID: 2421095019425230533, guid: dd21a3629f135a74eb1112a9776c452b, type: 3}
+  - {fileID: 2421095019425230533, guid: 2bb816ca83e8dc144bb9da045e6f5153, type: 3}
+  - {fileID: 2421095019425230533, guid: c93a9e0dd5f9df746b68380d4d96bc29, type: 3}
+  - {fileID: 2421095019425230533, guid: 97110bb18d849b149ba92b9c9034cafb, type: 3}
+  - {fileID: 2421095019425230533, guid: a0ee2c65a21fd0d4f9dd3499b170f855, type: 3}
+  - {fileID: 2421095019425230533, guid: ad2029fadf088294aaddabf714cbe51a, type: 3}
+  - {fileID: 2421095019425230533, guid: 6c458f77d0e3a15459d3bdbf198068f3, type: 3}
+  - {fileID: 2421095019425230533, guid: 7f2474989bdb8cf4d9c6ed3b3d8c0e0d, type: 3}
+  storyUIContainer: {fileID: 1295433924}
+  dontDestroyOnLoad: 1
+  debugStoryTypeToTest: 10
+  testHotkey: 32
+--- !u!4 &1292098570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1292098568}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.062169965, y: -81.42849, z: -45.980637}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1295433923
 GameObject:
   m_ObjectHideFlags: 0
@@ -2034,4 +2093,5 @@ SceneRoots:
   - {fileID: 295676584}
   - {fileID: 980459101}
   - {fileID: 11414570}
+  - {fileID: 1292098570}
   - {fileID: 61354549}

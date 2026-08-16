@@ -40,6 +40,8 @@ public static class Const
     public const string blackHoleSFX = "BlackHole";
     public const string absorbBlockSFX = "AbsorbBlock";
     public const string releaseBlockSFX = "ReleaseBlock";
+    public const string hardLevelSFX = "HardLevel";
+    public const string comboSFX = "Combo";
    
 
     // PlayerPrefs keys

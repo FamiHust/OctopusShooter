@@ -45,6 +45,10 @@ public class TutorialConfigSO : ScriptableObject
     [Tooltip("Level để trigger tutorial này")]
     public int tutorialLevel;
 
+    [Header("Story / Narrative")]
+    [Tooltip("Story Type cần phát trước khi vào level tutorial này (để None nếu không có)")]
+    public StoryType storyType = StoryType.None;
+
     [Header("Tutorial Steps")]
     public List<TutorialStep> steps = new List<TutorialStep>();
 

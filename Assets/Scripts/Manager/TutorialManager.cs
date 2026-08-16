@@ -439,6 +439,34 @@ public class TutorialManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    public TutorialConfigSO GetTutorialConfigForLevel(int level)
+    {
+        if (tutorials == null) return null;
+        for (int i = 0; i < tutorials.Count; i++)
+        {
+            var cfg = tutorials[i];
+            if (cfg != null && cfg.tutorialLevel == level)
+            {
+                return cfg;
+            }
+        }
+        return null;
+    }
+
+    public TutorialConfigSO GetPendingTutorialConfig(int level)
+    {
+        if (tutorials == null) return null;
+        for (int i = 0; i < tutorials.Count; i++)
+        {
+            var cfg = tutorials[i];
+            if (cfg != null && cfg.tutorialLevel == level && !IsTutorialCompleted(cfg.tutorialName))
+            {
+                return cfg;
+            }
+        }
+        return null;
+    }
+
     public void CheckAndStartTutorial(int currentLevel, Action onTutorialCompleteCallback = null)
     {
         this.onTutorialCompleteCallback = onTutorialCompleteCallback;

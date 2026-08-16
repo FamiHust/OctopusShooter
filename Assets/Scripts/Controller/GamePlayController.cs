@@ -26,6 +26,7 @@ public class GamePlayController : MonoBehaviour
     private Coroutine pendingMagicStoneClearRoutine;
     private InGameUIManager cachedInGameUIManager;
     private InputManager cachedInputManager;
+    private int currentLoadedLevel = 1;
     private const int magicStoneClearCost = 3;
     private bool isMagicStoneClearInProgress;
     private bool isGamePausedBySettingPopup;
@@ -246,11 +247,11 @@ public class GamePlayController : MonoBehaviour
             InGameUIManager inGameUIManager = GetInGameUIManagerCached();
             inGameUIManager?.ShowLastFourShooterPraise(remainingBeforeDisappear);
 
-            // Phát GoldEarn SFX với pitch và volume tăng dần theo combo: 4=Great(1.0, 1.0), 3=Nice(1.1, 1.15), 2=Awesome(1.2, 1.3), 1=Perfect(1.3, 1.45)
+            // Phát Combo SFX với pitch và volume tăng dần theo combo: 4=Great(1.0, 1.0), 3=Nice(1.1, 1.15), 2=Awesome(1.2, 1.3), 1=Perfect(1.3, 1.45)
             int comboStep = 4 - Mathf.Clamp(remainingBeforeDisappear, 1, 4);
             float comboPitch = 1f + comboStep * 0.15f;
             float comboVolume = 1f + comboStep * 0.15f;
-            AudioManager.Instance?.PlaySFX(Const.goldEarnSFX, comboPitch, comboVolume);
+            AudioManager.Instance?.PlaySFX(Const.comboSFX, comboPitch, comboVolume);
         }
 
         CancelPendingLoseTrigger();
@@ -542,6 +543,22 @@ public class GamePlayController : MonoBehaviour
 
     private IEnumerator TriggerWinFlow()
     {
+        if (ShouldPlayCompleteStory(currentLoadedLevel))
+        {
+            SetSplineRoutesStoryPaused(true);
+            bool storyFinished = false;
+            StoryManager.Instance.PlayStoryIfFirstTime(StoryType.Complete, () =>
+            {
+                storyFinished = true;
+            });
+
+            while (!storyFinished)
+            {
+                yield return null;
+            }
+            SetSplineRoutesStoryPaused(false);
+        }
+
         ConveyorArrowSystem arrowSystem = levelGO != null ? levelGO.GetComponentInChildren<ConveyorArrowSystem>(true) : null;
         if (arrowSystem != null)
         {
@@ -741,6 +758,7 @@ public class GamePlayController : MonoBehaviour
     {
         // Luon bat dau van moi o toc do x1.
         CleanupLevel();
+        currentLoadedLevel = level;
 
         LevelCameraConfigurator cameraConfigurator = levelCameraConfigurator != null
             ? levelCameraConfigurator
@@ -777,17 +795,7 @@ public class GamePlayController : MonoBehaviour
             TutorialManager.Instance?.PrewarmForLevelRuntime();
         }
 
-        if (animator != null)
-        {
-            pendingIntroRoutine = StartCoroutine(PlayIntroNextFrame(animator, level));
-        }
-        else
-        {
-            InGameUIManager inGameUIManager = GetInGameUIManagerCached();
-            inGameUIManager?.PlayHardLevelAfterLevelIntro();
-            SetInputLocked(false);
-            TutorialManager.Instance?.CheckAndStartTutorial(level);
-        }
+        StartLevelIntroFlow(animator, level);
     }
 
     public int GetMagicStoneClearCost()
@@ -2248,32 +2256,41 @@ public class GamePlayController : MonoBehaviour
         return shooter.GetBulletCount() > 0;
     }
 
-    private IEnumerator PlayIntroNextFrame(LevelElementAnimator animator, int level)
+    private IEnumerator PlayIntroNextFrame(LevelElementAnimator animator, int level, bool skipHUDDelay = false)
     {
         try
         {
-            yield return null;
+            if (!skipHUDDelay)
+            {
+                yield return null;
+
+                if (ShouldAbortIntroCoroutine(animator))
+                {
+                    SetInputLocked(false);
+                    yield break;
+                }
+
+                InGameUIManager inGameUIManager = GetInGameUIManagerCached();
+                if (inGameUIManager != null)
+                {
+                    float extraDelay = Mathf.Max(0f, inGameUIManager.GetLevelElementAnimatorDelayFromHUDStart());
+                    if (extraDelay > 0f)
+                    {
+                        yield return new WaitForSeconds(extraDelay);
+
+                        if (ShouldAbortIntroCoroutine(animator))
+                        {
+                            SetInputLocked(false);
+                            yield break;
+                        }
+                    }
+                }
+            }
 
             if (ShouldAbortIntroCoroutine(animator))
             {
                 SetInputLocked(false);
                 yield break;
-            }
-
-            InGameUIManager inGameUIManager = GetInGameUIManagerCached();
-            if (inGameUIManager != null)
-            {
-                float extraDelay = Mathf.Max(0f, inGameUIManager.GetLevelElementAnimatorDelayFromHUDStart());
-                if (extraDelay > 0f)
-                {
-                    yield return new WaitForSeconds(extraDelay);
-
-                    if (ShouldAbortIntroCoroutine(animator))
-                    {
-                        SetInputLocked(false);
-                        yield break;
-                    }
-                }
             }
 
             animator.PlayIntroAnimation();
@@ -2291,15 +2308,224 @@ public class GamePlayController : MonoBehaviour
 
             animator.ApplyPostIntroRenderOptimization();
 
-            inGameUIManager?.PlayHardLevelAfterLevelIntro();
-
-            SetInputLocked(false);
-            TutorialManager.Instance?.CheckAndStartTutorial(level);
+            FinishLevelIntroAndStartGameplay(level);
         }
         finally
         {
             pendingIntroRoutine = null;
         }
+    }
+
+    private void StartLevelIntroFlow(LevelElementAnimator animator, int level)
+    {
+        if (TryGetLevelStartStory(level, out StoryType storyType))
+        {
+            SetSplineRoutesStoryPaused(true);
+
+            System.Action onStoryFinished = () =>
+            {
+                SetSplineRoutesStoryPaused(false);
+
+                if (animator != null)
+                {
+                    pendingIntroRoutine = StartCoroutine(PlayIntroNextFrame(animator, level, true));
+                }
+                else
+                {
+                    FinishLevelIntroAndStartGameplay(level);
+                }
+            };
+
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ExecuteAfterLoading(() =>
+                {
+                    StoryManager.Instance.PlayStoryIfFirstTime(storyType, onStoryFinished);
+                });
+            }
+            else
+            {
+                StoryManager.Instance.PlayStoryIfFirstTime(storyType, onStoryFinished);
+            }
+        }
+        else
+        {
+            if (animator != null)
+            {
+                pendingIntroRoutine = StartCoroutine(PlayIntroNextFrame(animator, level, false));
+            }
+            else
+            {
+                FinishLevelIntroAndStartGameplay(level);
+            }
+        }
+    }
+
+    private void SetSplineRoutesStoryPaused(bool paused)
+    {
+        if (levelGO != null)
+        {
+            SplineRoute[] routes = levelGO.GetComponentsInChildren<SplineRoute>(true);
+            for (int i = 0; i < routes.Length; i++)
+            {
+                if (routes[i] != null)
+                {
+                    routes[i].SetStoryPaused(paused);
+                }
+            }
+        }
+    }
+
+    private bool TryGetLevelStartStory(int level, out StoryType storyType)
+    {
+        storyType = StoryType.None;
+
+        if (StoryManager.Instance == null)
+        {
+            return false;
+        }
+
+        // 1. Level 1: Intro Story
+        if (level == 1)
+        {
+            if (!StoryManager.Instance.IsStoryCompleted(StoryType.Intro) &&
+                StoryManager.Instance.GetStoryUI(StoryType.Intro) != null)
+            {
+                storyType = StoryType.Intro;
+                return true;
+            }
+            return false;
+        }
+
+        // 2. Check TutorialManager for TutorialConfigSO configured on this level
+        if (TutorialManager.Instance != null)
+        {
+            TutorialConfigSO tutConfig = TutorialManager.Instance.GetPendingTutorialConfig(level);
+            if (tutConfig != null)
+            {
+                if (tutConfig.storyType != StoryType.None && tutConfig.storyType != StoryType.Custom)
+                {
+                    if (!StoryManager.Instance.IsStoryCompleted(tutConfig.storyType) &&
+                        StoryManager.Instance.GetStoryUI(tutConfig.storyType) != null)
+                    {
+                        storyType = tutConfig.storyType;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // 3. Fallback / Automatic mapping by tutorial name or level index
+        StoryType inferredType = GetInferredStoryTypeForLevel(level);
+        if (inferredType != StoryType.None)
+        {
+            if (!StoryManager.Instance.IsStoryCompleted(inferredType) &&
+                StoryManager.Instance.GetStoryUI(inferredType) != null)
+            {
+                storyType = inferredType;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private StoryType GetInferredStoryTypeForLevel(int level)
+    {
+        if (TutorialManager.Instance != null)
+        {
+            TutorialConfigSO tut = TutorialManager.Instance.GetTutorialConfigForLevel(level);
+            if (tut != null)
+            {
+                string configName = tut.name;
+                string tutName = tut.tutorialName ?? "";
+
+                if (configName.IndexOf("AddSlot", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("AddSlot", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Booster_AddSlot;
+                }
+                if (configName.IndexOf("PickLocked", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    configName.IndexOf("MoveShooter", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("MoveShooter", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Booster_MoveShooter;
+                }
+                if (configName.IndexOf("Hero", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    configName.IndexOf("SuperShooter", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("SuperShooter", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Booster_SuperShooter;
+                }
+                if (configName.IndexOf("MagicStone", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("MagicStone", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Booster_MagicStone;
+                }
+                if (configName.IndexOf("Portal", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("Portal", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Blocker_Portal;
+                }
+                if (configName.IndexOf("Hidden", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("Hidden", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Blocker_Hidden;
+                }
+                if (configName.IndexOf("Ice", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("Ice", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Blocker_Ice;
+                }
+                if (configName.IndexOf("Tunnel", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    tutName.IndexOf("Tunnel", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return StoryType.Blocker_Tunnel;
+                }
+            }
+        }
+
+        switch (level)
+        {
+            case 4: return StoryType.Booster_AddSlot;
+            case 6: return StoryType.Booster_MoveShooter;
+            case 8: return StoryType.Booster_SuperShooter;
+            case 10: return StoryType.Booster_MagicStone;
+            case 15: return StoryType.Blocker_Portal;
+            case 25: return StoryType.Blocker_Hidden;
+            case 35: return StoryType.Blocker_Ice;
+            case 45: return StoryType.Blocker_Tunnel;
+            default: return StoryType.None;
+        }
+    }
+
+    private bool ShouldPlayCompleteStory(int level)
+    {
+        if (level != 1)
+        {
+            return false;
+        }
+
+        if (StoryManager.Instance == null)
+        {
+            return false;
+        }
+
+        if (StoryManager.Instance.IsStoryCompleted(StoryType.Complete))
+        {
+            return false;
+        }
+
+        return StoryManager.Instance.GetStoryUI(StoryType.Complete) != null;
+    }
+
+    private void FinishLevelIntroAndStartGameplay(int level)
+    {
+        InGameUIManager inGameUIManager = GetInGameUIManagerCached();
+        inGameUIManager?.PlayHardLevelAfterLevelIntro();
+
+        SetInputLocked(false);
+        TutorialManager.Instance?.CheckAndStartTutorial(level);
     }
 
     private bool ShouldAbortIntroCoroutine(LevelElementAnimator animator)

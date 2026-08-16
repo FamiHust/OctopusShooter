@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,9 +6,13 @@ using UnityEngine.UI;
 using DG.Tweening;
 using UnityEngine.Profiling;
 using TMPro;
+using Random = UnityEngine.Random;
 
 public class LoadingUI : MonoBehaviour
 {
+    public event Action OnLoadingFinished;
+    public bool IsLoading => loadingRoutine != null && gameObject.activeInHierarchy;
+
     [Header("Text UI")]
     [SerializeField] private Text progressText;
 
@@ -256,6 +261,7 @@ public class LoadingUI : MonoBehaviour
         }
 
         loadingRoutine = null;
+        OnLoadingFinished?.Invoke();
     }
 
     private IEnumerator FakeLoadRoutineGentle()
@@ -292,6 +298,7 @@ public class LoadingUI : MonoBehaviour
         }
 
         loadingRoutine = null;
+        OnLoadingFinished?.Invoke();
     }
 
     private IEnumerator FadeOutRoutine()
