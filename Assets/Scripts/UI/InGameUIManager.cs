@@ -7,22 +7,10 @@ using DG.Tweening;
 using UnityEngine.Serialization;
 using UnityEngine.Profiling;
 
-/// <summary>
-/// Quáº£n lÃ½ toÃ n bá»™ UI trong mÃ n chÆ¡i.
-/// 
-/// Flow khá»Ÿi táº¡o (gá»i tá»« luá»“ng init level):
-///   Init(GamePlayController) â†’ check unlock â†’ áº©n/hiá»‡n booster panel â†’ init buttons
-/// 
-/// Flow booster:
-///   BoosterButtonPrefab.OnClick â†’ InGameUIManager.OnUseBooster(id)
-///   â†’ BoosterManager.TryActivate â†’ (1-step: execute; 2-step: enter mode)
-///   â†’ Náº¿u 2-step: hiá»‡n instruction panel; nháº¥n button láº¡i â†’ cancel
-/// </summary>
 public class InGameUIManager : MonoBehaviour
 {
     public static InGameUIManager Instance { get; private set; }
 
-    // â”€â”€â”€ Booster UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     [Header("Booster")]
     [Tooltip("Táº¥t cáº£ BoosterButtonPrefab trong scene, theo thá»© tá»±")]
     [SerializeField] private List<BoosterButtonPrefab> boosterButtons = new List<BoosterButtonPrefab>();
@@ -44,7 +32,10 @@ public class InGameUIManager : MonoBehaviour
 
     [Header("Hard Level UI")]
     [SerializeField] private GameObject hardLevel;
+    [SerializeField] private GameObject hardLevelTag;
     [SerializeField] private HardLevelConfigSO hardLevelConfig;
+    [SerializeField] private Color hardLevelOutlineColor = new Color(0.9f, 0.12f, 0.12f, 1f);
+    [SerializeField] private Color hardLevelShadowColor = new Color(0.6f, 0.05f, 0.05f, 1f);
     [SerializeField] private float hardLevelFirstImageMoveDuration = 0.45f;
     [SerializeField] private float hardLevelSecondImageScaleDuration = 0.3f;
     [SerializeField] private float hardLevelSecondImageDelay = 0.08f;
@@ -182,6 +173,15 @@ public class InGameUIManager : MonoBehaviour
     private readonly List<Tween> gameplayCoinFlyTweens = new List<Tween>(32);
     private readonly List<GameObject> activeGameplayCoinFlyObjects = new List<GameObject>(32);
     private Tween magicStoneFillTween;
+    private struct ShadowEffectCache
+    {
+        public Shadow component;
+        public Color originalColor;
+        public bool isOutline;
+    }
+
+    private List<ShadowEffectCache> cachedLevelTextEffects;
+    private bool hasCachedLevelTextEffects;
 
     public void Init(GamePlayController controller)
     {
@@ -310,7 +310,16 @@ public class InGameUIManager : MonoBehaviour
             ? gamePlayController.GetPendingMagicStoneCoinReward()
             : 0;
         coinText.text = (savedCoins + Mathf.Max(0, pendingMagicStoneCoins)).ToString();
-        levelText.text = "Level " +PlayerPrefs.GetInt(Const.player_level_key, 1).ToString();
+
+        int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
+        levelText.text = "Level " + currentLevel.ToString();
+
+        bool isHard = IsHardLevel(currentLevel);
+        UpdateLevelTextHardVisual(isHard);
+        if (hardLevelTag != null)
+        {
+            SetActiveIfChanged(hardLevelTag, isHard);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -1045,20 +1054,27 @@ public class InGameUIManager : MonoBehaviour
             RequestBoosterPopupPause();
 
             Button coinButton = FindCoinPurchaseButtonForBooster(popup, boosterId);
-            if (coinButton == null)
+            if (coinButton != null)
             {
-                ;
-                return;
+                int resolvedPopupPrice = ResolvePopupCoinPriceForBooster(popup, boosterId, pendingBuyPrice);
+                pendingBuyPrice = resolvedPopupPrice;
+
+                coinButton.onClick.RemoveAllListeners();
+                coinButton.onClick.AddListener(() =>
+                {
+                    HandleBoosterPurchaseByCoin(popup, pendingBuyBoosterId, resolvedPopupPrice);
+                });
             }
 
-            int resolvedPopupPrice = ResolvePopupCoinPriceForBooster(popup, boosterId, pendingBuyPrice);
-            pendingBuyPrice = resolvedPopupPrice;
-
-            coinButton.onClick.RemoveAllListeners();
-            coinButton.onClick.AddListener(() =>
+            Button getButton = FindGetPurchaseButtonForBooster(popup, boosterId);
+            if (getButton != null)
             {
-                HandleBoosterPurchaseByCoin(popup, pendingBuyBoosterId, resolvedPopupPrice);
-            });
+                getButton.onClick.RemoveAllListeners();
+                getButton.onClick.AddListener(() =>
+                {
+                    HandleBoosterGetReward(popup, pendingBuyBoosterId);
+                });
+            }
         });
 
     }
@@ -1369,8 +1385,73 @@ public class InGameUIManager : MonoBehaviour
         }
     }
 
+    public bool IsHardLevel(int level)
+    {
+        return hardLevelConfig != null && hardLevelConfig.IsHardLevel(level);
+    }
+
+    private void CacheLevelTextEffectsIfNeeded()
+    {
+        if (hasCachedLevelTextEffects || levelText == null)
+        {
+            return;
+        }
+
+        cachedLevelTextEffects = new List<ShadowEffectCache>();
+        Shadow[] shadows = levelText.GetComponentsInChildren<Shadow>(true);
+        for (int i = 0; i < shadows.Length; i++)
+        {
+            Shadow s = shadows[i];
+            if (s != null)
+            {
+                cachedLevelTextEffects.Add(new ShadowEffectCache
+                {
+                    component = s,
+                    originalColor = s.effectColor,
+                    isOutline = s is Outline
+                });
+            }
+        }
+
+        hasCachedLevelTextEffects = true;
+    }
+
+    private void UpdateLevelTextHardVisual(bool isHard)
+    {
+        CacheLevelTextEffectsIfNeeded();
+
+        if (cachedLevelTextEffects == null || cachedLevelTextEffects.Count == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < cachedLevelTextEffects.Count; i++)
+        {
+            ShadowEffectCache cache = cachedLevelTextEffects[i];
+            if (cache.component == null) continue;
+
+            if (isHard)
+            {
+                cache.component.effectColor = cache.isOutline ? hardLevelOutlineColor : hardLevelShadowColor;
+            }
+            else
+            {
+                cache.component.effectColor = cache.originalColor;
+            }
+        }
+    }
+
     private void PrepareHardLevelVisualForCurrentLevel()
     {
+        int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
+        bool isHard = IsHardLevel(currentLevel);
+
+        UpdateLevelTextHardVisual(isHard);
+        if (hardLevelTag != null)
+        {
+            SetActiveIfChanged(hardLevelTag, isHard);
+        }
+
         if (hardLevel == null)
         {
             shouldShowHardLevelAfterLevelIntro = false;
@@ -1381,8 +1462,7 @@ public class InGameUIManager : MonoBehaviour
         KillHardLevelIntroTween();
         hasPlayedHardLevelIntro = false;
 
-        int currentLevel = PlayerPrefs.GetInt(Const.player_level_key, 1);
-        shouldShowHardLevelAfterLevelIntro = hardLevelConfig != null && hardLevelConfig.IsHardLevel(currentLevel);
+        shouldShowHardLevelAfterLevelIntro = isHard;
         SetActiveIfChanged(hardLevel, false);
     }
 
@@ -1788,6 +1868,7 @@ public class InGameUIManager : MonoBehaviour
 
     private void OnInstructionCancel()
     {
+        AudioManager.Instance?.PlaySFX(Const.selectBoosterSFX);
         BoosterManager.Instance?.CancelPickLockedShooterMode();
         HideInstructionPanel();
     }
@@ -1839,7 +1920,8 @@ public class InGameUIManager : MonoBehaviour
         int safePrice = Mathf.Max(0, price);
         if (!TrySpendCoins(safePrice))
         {
-            ;
+            AudioManager.Instance?.PlaySFX(Const.popLockSFX);
+            popup?.ShowNotEnoughCoinNote();
             return;
         }
 
@@ -1851,7 +1933,25 @@ public class InGameUIManager : MonoBehaviour
             return;
         }
 
-        AudioManager.Instance?.PlaySFX(Const.popUISFX);
+        AudioManager.Instance?.PlaySFX(Const.buyBoosterSFX);
+        popup?.Hide();
+        UpdateCoinAndLevelUI();
+        RefreshAllButtons();
+    }
+
+    private void HandleBoosterGetReward(BasePopUp popup, string boosterId)
+    {
+        if (string.IsNullOrEmpty(boosterId))
+        {
+            return;
+        }
+
+        if (BoosterManager.Instance == null || !BoosterManager.Instance.AddBooster(boosterId, 1))
+        {
+            PlayerData.Instance?.AddBooster(boosterId, 1);
+        }
+
+        AudioManager.Instance?.PlaySFX(Const.buyBoosterSFX);
         popup?.Hide();
         UpdateCoinAndLevelUI();
         RefreshAllButtons();
@@ -2048,6 +2148,92 @@ public class InGameUIManager : MonoBehaviour
         }
 
         return fallback;
+    }
+
+    private Button FindGetPurchaseButtonForBooster(BasePopUp popup, string boosterId)
+    {
+        if (popup == null)
+        {
+            return null;
+        }
+
+        if (boosterId == Const.BOOSTER_ADDSLOT)
+        {
+            AddDeckPopup addDeckPopup = popup.GetComponent<AddDeckPopup>();
+            if (addDeckPopup == null)
+            {
+                addDeckPopup = popup.gameObject.AddComponent<AddDeckPopup>();
+            }
+
+            Button btn = addDeckPopup.GetButton();
+            if (btn != null)
+            {
+                return btn;
+            }
+        }
+
+        if (IsMoveShooterBooster(boosterId))
+        {
+            AddMoveShooterPopup addMoveShooterPopup = popup.GetComponent<AddMoveShooterPopup>();
+            if (addMoveShooterPopup == null)
+            {
+                addMoveShooterPopup = popup.gameObject.AddComponent<AddMoveShooterPopup>();
+            }
+
+            Button btn = addMoveShooterPopup.GetButton();
+            if (btn != null)
+            {
+                return btn;
+            }
+        }
+
+        if (boosterId == Const.BOOSTER_HERO)
+        {
+            AddSuperShooterPopup addSuperShooterPopup = popup.GetComponent<AddSuperShooterPopup>();
+            if (addSuperShooterPopup == null)
+            {
+                addSuperShooterPopup = popup.gameObject.AddComponent<AddSuperShooterPopup>();
+            }
+
+            Button btn = addSuperShooterPopup.GetButton();
+            if (btn != null)
+            {
+                return btn;
+            }
+        }
+
+        return FindGetPurchaseButtonFallback(popup);
+    }
+
+    private Button FindGetPurchaseButtonFallback(BasePopUp popup)
+    {
+        Button[] buttons = popup.GetComponentsInChildren<Button>(true);
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            Button candidate = buttons[i];
+            if (candidate == null)
+            {
+                continue;
+            }
+
+            string buttonName = candidate.gameObject.name.ToLowerInvariant();
+            if (buttonName.Contains("close") || buttonName.Contains("cancel") || buttonName == "x")
+            {
+                continue;
+            }
+
+            if (buttonName.Contains("coin") || buttonName.Contains("buy") || buttonName.Contains("usecoin"))
+            {
+                continue;
+            }
+
+            if (buttonName.Contains("get") || buttonName.Contains("ad") || buttonName.Contains("free") || buttonName.Contains("reward"))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 }
 

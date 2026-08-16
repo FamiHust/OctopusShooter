@@ -28,6 +28,8 @@ public static class Const
     public const string popUISFX = "PopUI";
     public const string shooterDoneSFX = "ShooterDone";
     public const string useBoosterSFX = "UseBooster";
+    public const string buyBoosterSFX = "BuyBooster";
+    public const string selectBoosterSFX = "SelectBooster";
     public const string winSFX = "Win";
     public const string popShootSFX = "PopShoot";
     public const string popLockSFX = "PopLock";
@@ -42,6 +44,7 @@ public static class Const
     public const string releaseBlockSFX = "ReleaseBlock";
     public const string hardLevelSFX = "HardLevel";
     public const string comboSFX = "Combo";
+    public const string tapHintStorySFX = "TapHintStory";
    
 
     // PlayerPrefs keys

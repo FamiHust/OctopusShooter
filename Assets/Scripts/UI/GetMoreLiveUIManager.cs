@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class GetMoreLiveUIManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class GetMoreLiveUIManager : MonoBehaviour
     [SerializeField] private int getHeartAmount = 1;
     [SerializeField] private int refillHeartAmount = 5;
     [SerializeField] private int refillCoinCost = 900;
+    [SerializeField] private GameObject notePrefab;
+    [SerializeField] private float noteClickCooldown = 1f;
+    private float nextNoteClickTime;
 
     private Coroutine heartRegenCoroutine;
     private readonly WaitForSecondsRealtime heartTickInterval = new WaitForSecondsRealtime(1f);
@@ -113,16 +117,66 @@ public class GetMoreLiveUIManager : MonoBehaviour
 
     private void OnRefillClicked()
     {
-        AudioManager.Instance?.PlaySFX(Const.popUISFX);
-
         int safeCost = Mathf.Max(0, refillCoinCost);
         if (!TrySpendCoins(safeCost))
+        {
+            AudioManager.Instance?.PlaySFX(Const.popLockSFX);
+            ShowNotEnoughCoinNote();
+            return;
+        }
+
+        AudioManager.Instance?.PlaySFX(Const.popUISFX);
+        AddHearts(refillHeartAmount);
+        ReturnToMenu();
+    }
+
+    public void ShowNotEnoughCoinNote(Transform customParent = null)
+    {
+        if (notePrefab == null)
         {
             return;
         }
 
-        AddHearts(refillHeartAmount);
-        ReturnToMenu();
+        if (Time.unscaledTime < nextNoteClickTime)
+        {
+            return;
+        }
+
+        nextNoteClickTime = Time.unscaledTime + Mathf.Max(0.05f, noteClickCooldown);
+
+        Transform parentTransform = customParent != null ? customParent : transform;
+        GameObject note = Instantiate(notePrefab, parentTransform);
+        RectTransform rt = note.GetComponent<RectTransform>();
+        CanvasGroup cg = note.GetComponent<CanvasGroup>();
+
+        if (rt != null)
+        {
+            rt.anchoredPosition = Vector2.zero;
+            rt.localScale = Vector3.one;
+        }
+
+        Sequence sequence = DOTween.Sequence();
+        sequence.SetUpdate(true);
+
+        if (rt != null)
+        {
+            sequence.Append(rt.DOAnchorPosY(300f, 2f).SetEase(Ease.Linear))
+                    .Join(rt.DOScale(Vector3.one * 1.2f, 1f).SetEase(Ease.OutBack))
+                    .SetLoops(1, LoopType.Yoyo);
+        }
+
+        if (cg != null)
+        {
+            sequence.Join(cg.DOFade(0f, 1f).SetEase(Ease.InCubic).SetDelay(1f));
+        }
+
+        sequence.OnComplete(() =>
+        {
+            if (note != null)
+            {
+                Destroy(note);
+            }
+        });
     }
 
     private void ReturnToMenu()

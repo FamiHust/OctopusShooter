@@ -70,8 +70,8 @@ public class StoryUI : MonoBehaviour
     [SerializeField] private GameObject nextHintObject;
 
     [Header("5. Audio (Tùy chọn)")]
-    [Tooltip("Key SFX khi người chơi tap/chạm mở ô truyện hoặc bấm Skip (mặc định 'PopUI' giống nút bấm button)")]
-    [SerializeField] private string tapSfxKey = Const.popUISFX;
+    [Tooltip("Key SFX khi người chơi tap/chạm mở ô truyện hoặc bấm Skip (mặc định 'TapHintStory')")]
+    [SerializeField] private string tapSfxKey = Const.tapHintStorySFX;
 
     [Tooltip("Key SFX chung trong AudioManager khi một ô truyện xuất hiện")]
     [SerializeField] private string panelShowSfxKey = "";
@@ -587,7 +587,7 @@ public class StoryUI : MonoBehaviour
 
     private void PlayTapSFX()
     {
-        string sfxKey = !string.IsNullOrEmpty(tapSfxKey) ? tapSfxKey : Const.popUISFX;
+        string sfxKey = (!string.IsNullOrEmpty(tapSfxKey) && tapSfxKey != Const.popUISFX) ? tapSfxKey : Const.tapHintStorySFX;
         if (!string.IsNullOrEmpty(sfxKey))
         {
             AudioManager.Instance?.PlaySFX(sfxKey);

@@ -328,6 +328,7 @@ public class BoosterManager : MonoBehaviour
         if (currentMode == ActiveBoosterMode.PickLockedShooter
             && activeStrategy?.BoosterName == strategy.BoosterName)
         {
+            AudioManager.Instance?.PlaySFX(Const.selectBoosterSFX);
             CancelPickLockedShooterMode();
             return;
         }
@@ -336,6 +337,7 @@ public class BoosterManager : MonoBehaviour
         if (currentMode == ActiveBoosterMode.HeroShooter
             && activeStrategy?.BoosterName == strategy.BoosterName)
         {
+            AudioManager.Instance?.PlaySFX(Const.selectBoosterSFX);
             CancelHeroShooterMode();
             return;
         }
@@ -347,6 +349,8 @@ public class BoosterManager : MonoBehaviour
         }
 
         if (!strategy.CanUse()) return;
+
+        AudioManager.Instance?.PlaySFX(Const.selectBoosterSFX);
 
         activeStrategy = strategy;
         strategy.Execute(OnStrategyComplete);
@@ -465,6 +469,7 @@ public class BoosterManager : MonoBehaviour
         SetBoosterOverlayActive(false);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterDeactivated, null);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterButtonRefresh, null);
+        BaseShooter.RefreshAllShootersCountTextVisibility();
 
         if (completed) pendingOnComplete?.Invoke();
         pendingOnComplete = null;
@@ -478,6 +483,7 @@ public class BoosterManager : MonoBehaviour
         SetMainRoutePausedForBooster(false);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterDeactivated, null);
         GameEventHub.Instance.Invoke(GameEventType.OnBoosterButtonRefresh, null);
+        BaseShooter.RefreshAllShootersCountTextVisibility();
     }
 
     // ──────────────────────────────────────────────────────────────────
@@ -520,6 +526,8 @@ public class BoosterManager : MonoBehaviour
         {
             tutMgr?.RestoreBoosterHighlights();
         }
+
+        BaseShooter.RefreshAllShootersCountTextVisibility();
     }
 
     public bool IsPickLockedShooterModeActive()

@@ -1502,7 +1502,21 @@ public class BaseShooter : MonoBehaviour
         if (bulletCount <= 0) return false;
         if (currentState == ShooterState.Lock || currentState == ShooterState.Empty || currentState == ShooterState.Disappear || currentState == ShooterState.Frozen) return false;
         if (IsMechanicActive()) return false;
+        if (BoosterManager.Instance != null && BoosterManager.Instance.IsPickLockedShooterModeActive()) return false;
         return true;
+    }
+
+    public static void RefreshAllShootersCountTextVisibility()
+    {
+        for (int i = registeredShooters.Count - 1; i >= 0; i--)
+        {
+            if (i >= registeredShooters.Count) continue;
+            BaseShooter s = registeredShooters[i];
+            if (s != null && s.isActiveAndEnabled)
+            {
+                s.UpdateCountTextVisibilityAndAlpha();
+            }
+        }
     }
 
     /// <summary>
@@ -3885,7 +3899,7 @@ public class BaseShooter : MonoBehaviour
     {
         KillBoosterHighlightTween();
 
-        if (currentState == ShooterState.Lock)
+        if (currentState == ShooterState.Lock || currentState == ShooterState.Frozen)
         {
             PlayAnimation("TouchLock", false);
         }
@@ -3893,11 +3907,12 @@ public class BaseShooter : MonoBehaviour
         {
             idleTween?.Kill();
             idleTween = null;
-            if (animationComponent != null)
-            {
-                animationComponent.Stop();
-            }
+            PlayAnimation("TouchLock", false);
             StartIdleLogic();
+        }
+        else
+        {
+            PlayAnimation("TouchLock", false);
         }
     }
 

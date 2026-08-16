@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -22,6 +22,13 @@ public class BasePopUp : MonoBehaviour
     [SerializeField] protected Image overlayImage;
     [SerializeField] protected Color overlayColor = new Color(0, 0, 0, 0.7f);
     [SerializeField] protected bool destroyOnHide = true;
+
+    [Header("Note / Toast (Not Enough Coins)")]
+    [SerializeField] protected GameObject notePrefab;
+    [SerializeField] protected float noteClickCooldown = 1f;
+    private float nextNoteClickTime;
+
+    public GameObject NotePrefab => notePrefab;
 
     protected bool isShowing = false;
     private Sequence currentSequence;
@@ -248,5 +255,54 @@ public class BasePopUp : MonoBehaviour
     protected bool ShouldDestroyOnHide()
     {
         return destroyOnHide;
+    }
+
+    public void ShowNotEnoughCoinNote(Transform customParent = null)
+    {
+        if (notePrefab == null)
+        {
+            return;
+        }
+
+        if (Time.unscaledTime < nextNoteClickTime)
+        {
+            return;
+        }
+
+        nextNoteClickTime = Time.unscaledTime + Mathf.Max(0.05f, noteClickCooldown);
+
+        Transform parentTransform = customParent != null ? customParent : (contentPanel != null ? contentPanel.transform : transform);
+        GameObject note = Instantiate(notePrefab, parentTransform);
+        RectTransform rt = note.GetComponent<RectTransform>();
+        CanvasGroup cg = note.GetComponent<CanvasGroup>();
+
+        if (rt != null)
+        {
+            rt.anchoredPosition = Vector2.zero;
+            rt.localScale = Vector3.one;
+        }
+
+        Sequence sequence = DOTween.Sequence();
+        sequence.SetUpdate(true);
+
+        if (rt != null)
+        {
+            sequence.Append(rt.DOAnchorPosY(300f, 2f).SetEase(Ease.Linear))
+                    .Join(rt.DOScale(Vector3.one * 1.2f, 1f).SetEase(Ease.OutBack))
+                    .SetLoops(1, LoopType.Yoyo);
+        }
+
+        if (cg != null)
+        {
+            sequence.Join(cg.DOFade(0f, 1f).SetEase(Ease.InCubic).SetDelay(1f));
+        }
+
+        sequence.OnComplete(() =>
+        {
+            if (note != null)
+            {
+                Destroy(note);
+            }
+        });
     }
 }

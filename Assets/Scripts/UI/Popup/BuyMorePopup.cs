@@ -90,14 +90,15 @@ public class BuyMorePopup : BasePopUp
 
 	private void OnHeartButtonClicked()
 	{
-		AudioManager.Instance?.PlaySFX(Const.popUISFX);
-
 		int safeCost = Mathf.Max(0, heartButtonCoinCost);
 		if (!TrySpendCoins(safeCost))
 		{
+			AudioManager.Instance?.PlaySFX(Const.popLockSFX);
+			ShowNotEnoughCoinNote();
 			return;
 		}
 
+		AudioManager.Instance?.PlaySFX(Const.popUISFX);
 		AddHearts(heartButtonGrantAmount);
 		RefreshMenuUI();
 	}

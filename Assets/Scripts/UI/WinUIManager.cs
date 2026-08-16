@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -146,6 +146,11 @@ public class WinUIManager : MonoBehaviour
         if (nextBtn != null)
         {
             nextBtn.onClick.RemoveAllListeners();
+        }
+
+        if (x2CoinBtn != null)
+        {
+            x2CoinBtn.onClick.RemoveAllListeners();
         }
 
         if (coinCountTween != null && coinCountTween.IsActive())
@@ -668,30 +673,55 @@ public class WinUIManager : MonoBehaviour
 
     private void SetButton()
     {
-        if (nextBtn == null)
-            return;
-
-        nextBtn.onClick.RemoveAllListeners();
-        nextBtn.onClick.AddListener(() =>
+        if (nextBtn != null)
         {
-            if (isNextFlowRunning)
-                return;
-
-            isNextFlowRunning = true;
-
-            if (x2CoinBtn != null)
-                x2CoinBtn.gameObject.SetActive(false);
-            if (starLevel != null)
-                starLevel.SetActive(false);
-            nextBtn.gameObject.SetActive(false);
-
-            if (UIManager.Instance != null)
+            nextBtn.onClick.RemoveAllListeners();
+            nextBtn.onClick.AddListener(() =>
             {
-                UIManager.Instance.HideInGameUIImmediate();
-            }
+                if (isNextFlowRunning)
+                    return;
 
-            PlayCoinCollectAnimation(nextButtonCoinReward, OnNextCoinFlowCompleted);
-        });
+                isNextFlowRunning = true;
+
+                if (x2CoinBtn != null)
+                    x2CoinBtn.gameObject.SetActive(false);
+                if (starLevel != null)
+                    starLevel.SetActive(false);
+                nextBtn.gameObject.SetActive(false);
+
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.HideInGameUIImmediate();
+                }
+
+                PlayCoinCollectAnimation(nextButtonCoinReward, OnNextCoinFlowCompleted);
+            });
+        }
+
+        if (x2CoinBtn != null)
+        {
+            x2CoinBtn.onClick.RemoveAllListeners();
+            x2CoinBtn.onClick.AddListener(() =>
+            {
+                if (isNextFlowRunning)
+                    return;
+
+                isNextFlowRunning = true;
+
+                x2CoinBtn.gameObject.SetActive(false);
+                if (starLevel != null)
+                    starLevel.SetActive(false);
+                if (nextBtn != null)
+                    nextBtn.gameObject.SetActive(false);
+
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.HideInGameUIImmediate();
+                }
+
+                PlayCoinCollectAnimation(nextButtonCoinReward * 2, OnNextCoinFlowCompleted);
+            });
+        }
     }
 
     public void PlayCoinCollectAnimation()

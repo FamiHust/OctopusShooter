@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -181,7 +181,8 @@ public class KeepPlayingPopup : BasePopUp
         int cost = Mathf.Max(0, playOnCoinCost);
         if (!TrySpendCoins(cost))
         {
-            ;
+            AudioManager.Instance?.PlaySFX(Const.popLockSFX);
+            ShowNotEnoughCoinNote();
             return;
         }
 
