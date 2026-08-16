@@ -196,10 +196,24 @@ public class InputManager : MonoBehaviour
         if (!TryRaycast(out BaseShooter shooter))
             return;
 
-        if (shooter.GetCurrentState() == ShooterState.Lock)
+        if (shooter.IsSelectableForMoveShooter())
         {
-            PlayLockTapSfx();
+            if (shooter.GetCurrentState() == ShooterState.Lock)
+            {
+                PlayLockTapSfx();
+            }
             BoosterManager.Instance?.OnLockedShooterPicked(shooter);
+        }
+        else
+        {
+            if (shooter.GetCurrentState() == ShooterState.Frozen)
+            {
+                (shooter as IceShooter)?.PlayFrozenShakeAnimation();
+            }
+            else
+            {
+                shooter.PlayTouchLockAnimation();
+            }
         }
     }
 
@@ -311,32 +325,7 @@ public class InputManager : MonoBehaviour
 
     private bool IsLastPickableShooterOnGrid(BaseShooter selectedShooter)
     {
-        if (selectedShooter == null)
-        {
-            return false;
-        }
-
-        BaseShooter.FillRegisteredShooterBuffer(shooterBuffer, true);
-        for (int i = 0; i < shooterBuffer.Count; i++)
-        {
-            BaseShooter shooter = shooterBuffer[i];
-            if (shooter == null || shooter == selectedShooter)
-            {
-                continue;
-            }
-
-            ShooterState state = shooter.GetCurrentState();
-            // TÃ­nh cáº£ shooter bá»‹ lock/frozen lÃ  "váº«n cÃ²n shooter trÃªn grid"
-            // Ä‘á»ƒ khÃ´ng báº­t x2 quÃ¡ sá»›m khi cÃ²n shooter chá» Ä‘Æ°á»£c unlock.
-            if (state == ShooterState.IdleGrid ||
-                state == ShooterState.Lock ||
-                state == ShooterState.Frozen)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return BaseShooter.IsLastPickableShooterOnGrid(selectedShooter);
     }
 
     private void OnShooterSelectedFailed(BaseShooter shooter)

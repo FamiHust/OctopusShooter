@@ -15,6 +15,17 @@ public class HiddenShooter : BaseShooter
     private bool visualsInitialized;
     private bool isHiddenVisual;
 
+    public bool IsHidden => isHiddenVisual;
+
+    public override bool IsSelectableForMoveShooter()
+    {
+        if (GetCurrentState() == ShooterState.Lock || isHiddenVisual)
+        {
+            return false;
+        }
+        return base.IsSelectableForMoveShooter();
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -160,9 +171,8 @@ public class HiddenShooter : BaseShooter
 
     private void UpdateVisualByCurrentState()
     {
-        bool revealForPickLockedMode = ShouldRevealForPickLockedMode();
         ShooterState currentState = GetCurrentState();
-        bool shouldHide = currentState == ShooterState.Lock && !revealForPickLockedMode;
+        bool shouldHide = currentState == ShooterState.Lock;
 
         if (shouldHide)
         {
@@ -175,15 +185,8 @@ public class HiddenShooter : BaseShooter
 
         if (isHiddenVisual)
         {
-            bool playEffect = !revealForPickLockedMode;
-            RevealOriginalVisual(playEffect);
+            RevealOriginalVisual(true);
         }
-    }
-
-    private bool ShouldRevealForPickLockedMode()
-    {
-        BoosterManager boosterManager = BoosterManager.Instance;
-        return boosterManager != null && boosterManager.IsPickLockedShooterModeActive();
     }
 
     private void EnsureVisualSetup()

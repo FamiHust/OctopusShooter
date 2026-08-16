@@ -429,6 +429,15 @@ public class BoosterManager : MonoBehaviour
         if (slotBar != null && slotBar.AddShooter(shooter))
         {
             AudioManager.Instance?.PlaySFX(Const.popUISFX);
+
+            if (BaseShooter.IsLastPickableShooterOnGrid(shooter) &&
+                SpeedMultiplierManager.Instance != null &&
+                !SpeedMultiplierManager.IsSpeedUpActive())
+            {
+                SpeedMultiplierManager.Instance.ToggleSpeedUp();
+                GameEventHub.Instance?.Invoke(GameEventType.OnBoosterButtonRefresh, null);
+            }
+
             GameEventHub.Instance.Invoke(GameEventType.OnShooterJumpStart, shooter);
             GameEventHub.Instance.Invoke(GameEventType.OnShooterSelected,  shooter);
             GameEventHub.Instance.Invoke(GameEventType.OnShooterAddedToSlot, null);
@@ -484,18 +493,26 @@ public class BoosterManager : MonoBehaviour
         {
             BaseShooter s = shooterBuffer[i];
             if (s == except) continue;
-            if (s.GetCurrentState() == ShooterState.Lock)
+
+            if (s != null && s.IsSelectableForMoveShooter())
             {
                 if (highlight)
                 {
                     s.PlayBoosterHighlightAnimation();
                     tutMgr?.HighlightGameObjectForBooster(s.gameObject);
+                    if (s.GetCurrentState() == ShooterState.Lock)
+                    {
+                        s.RefreshBlockedStateScale();
+                    }
                 }
                 else
                 {
                     s.StopBoosterHighlightAnimation();
+                    if (s.GetCurrentState() == ShooterState.Lock)
+                    {
+                        s.RefreshBlockedStateScale();
+                    }
                 }
-                s.RefreshBlockedStateScale();
             }
         }
 

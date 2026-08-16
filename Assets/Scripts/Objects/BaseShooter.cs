@@ -1829,6 +1829,10 @@ public class BaseShooter : MonoBehaviour
 
     public void RefreshBlockedStateScale()
     {
+        if (currentState != ShooterState.Lock && currentState != ShooterState.Frozen)
+        {
+            return;
+        }
         UpdateStateScale(currentState);
     }
 
@@ -1846,7 +1850,14 @@ public class BaseShooter : MonoBehaviour
         bool isBlocked;
         if (state == ShooterState.Lock)
         {
-            isBlocked = !isPickLockedActive;
+            if (this is HiddenShooter)
+            {
+                isBlocked = true;
+            }
+            else
+            {
+                isBlocked = !isPickLockedActive;
+            }
         }
         else if (state == ShooterState.Frozen)
         {
@@ -3823,15 +3834,32 @@ public class BaseShooter : MonoBehaviour
     }
 
     /// <summary>
+    /// Kiểm tra xem shooter này có thể được chọn khi đang dùng MoveShooter (PickLockedShooter) booster hay không.
+    /// Cho phép chọn: Lock (không phải Hidden) và IdleGrid (tự do).
+    /// Subclasses (HiddenShooter, IceShooter) sẽ override để loại trừ các trạng thái bị ẩn hoặc đóng băng.
+    /// </summary>
+    public virtual bool IsSelectableForMoveShooter()
+    {
+        if (this == null || !gameObject.activeInHierarchy)
+        {
+            return false;
+        }
+
+        return currentState == ShooterState.Lock || currentState == ShooterState.IdleGrid;
+    }
+
+    /// <summary>
     /// [Booster] Phát animation highlight khi PickLockedShooter mode đang active.
     /// </summary>
     public void PlayBoosterHighlightAnimation()
     {
-        if (currentState != ShooterState.Lock)
+        if (!IsSelectableForMoveShooter())
         {
             return;
         }
 
+        idleTween?.Kill();
+        idleTween = null;
         KillBoosterHighlightTween();
 
         if (!HasAnimationClip("Booster"))
@@ -3846,22 +3874,58 @@ public class BaseShooter : MonoBehaviour
         boosterHighlightTween = DOVirtual.DelayedCall(boosterDuration, () =>
         {
             boosterHighlightTween = null;
-            if (currentState == ShooterState.Lock)
-            {
-                PlayLockIdleLoopAnimation();
-            }
+            PlayLockIdleLoopAnimation();
         });
     }
 
     /// <summary>
-    /// [Booster] Trả về animation lock bình thường sau khi mode kết thúc.
+    /// [Booster] Trả về animation bình thường sau khi mode kết thúc.
     /// </summary>
     public void StopBoosterHighlightAnimation()
     {
         KillBoosterHighlightTween();
 
         if (currentState == ShooterState.Lock)
+        {
             PlayAnimation("TouchLock", false);
+        }
+        else if (currentState == ShooterState.IdleGrid)
+        {
+            idleTween?.Kill();
+            idleTween = null;
+            if (animationComponent != null)
+            {
+                animationComponent.Stop();
+            }
+            StartIdleLogic();
+        }
+    }
+
+    public static bool IsLastPickableShooterOnGrid(BaseShooter selectedShooter)
+    {
+        if (selectedShooter == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < registeredShooters.Count; i++)
+        {
+            BaseShooter shooter = registeredShooters[i];
+            if (shooter == null || shooter == selectedShooter || !shooter.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            ShooterState state = shooter.GetCurrentState();
+            if (state == ShooterState.IdleGrid ||
+                state == ShooterState.Lock ||
+                state == ShooterState.Frozen)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void PlayLockIdleLoopAnimation()

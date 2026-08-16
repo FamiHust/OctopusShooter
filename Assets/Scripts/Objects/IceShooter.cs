@@ -17,6 +17,17 @@ public class IceShooter : BaseShooter
     private bool isShaking = false;
     private Tween hitTextTween;
 
+    public bool IsFrozen => isFrozen;
+
+    public override bool IsSelectableForMoveShooter()
+    {
+        if (isFrozen || GetCurrentState() == ShooterState.Frozen)
+        {
+            return false;
+        }
+        return base.IsSelectableForMoveShooter();
+    }
+
     protected override void OnValidate()
     {
         base.OnValidate();

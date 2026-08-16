@@ -32,11 +32,11 @@ public class PickLockedShooterBoosterStrategy : IBoosterStrategy
     {
         if (_slotBar == null) return false;
 
-        bool slotAvailable    = !_slotBar.IsFull();
-        bool hasLockedShooter = HasAnyLockedShooter();
-        bool hasBooster       = BoosterManager.Instance != null
-                                && BoosterManager.Instance.HasBooster(cfg.boosterName);
-        return slotAvailable && hasLockedShooter && hasBooster;
+        bool slotAvailable        = !_slotBar.IsFull();
+        bool hasSelectableShooter = HasAnySelectableShooter();
+        bool hasBooster           = BoosterManager.Instance != null
+                                    && BoosterManager.Instance.HasBooster(cfg.boosterName);
+        return slotAvailable && hasSelectableShooter && hasBooster;
     }
 
     public void Execute(System.Action onComplete, RectTransform buttonRect = null)
@@ -47,13 +47,13 @@ public class PickLockedShooterBoosterStrategy : IBoosterStrategy
     }
 
     // ─────────────────────────────────────────────
-    private static bool HasAnyLockedShooter()
+    private static bool HasAnySelectableShooter()
     {
         BaseShooter.FillRegisteredShooterBuffer(shooterBuffer, true);
         for (int i = 0; i < shooterBuffer.Count; i++)
         {
             BaseShooter s = shooterBuffer[i];
-            if (s.GetCurrentState() == ShooterState.Lock)
+            if (s != null && s.IsSelectableForMoveShooter())
                 return true;
         }
         return false;
