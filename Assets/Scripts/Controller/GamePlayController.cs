@@ -558,6 +558,21 @@ public class GamePlayController : MonoBehaviour
             }
             SetSplineRoutesStoryPaused(false);
         }
+        else if (ShouldPlayOutroStory(currentLoadedLevel))
+        {
+            SetSplineRoutesStoryPaused(true);
+            bool storyFinished = false;
+            StoryManager.Instance.PlayStoryIfFirstTime(StoryType.Outro, () =>
+            {
+                storyFinished = true;
+            });
+
+            while (!storyFinished)
+            {
+                yield return null;
+            }
+            SetSplineRoutesStoryPaused(false);
+        }
 
         ConveyorArrowSystem arrowSystem = levelGO != null ? levelGO.GetComponentInChildren<ConveyorArrowSystem>(true) : null;
         if (arrowSystem != null)
@@ -2517,6 +2532,37 @@ public class GamePlayController : MonoBehaviour
         }
 
         return StoryManager.Instance.GetStoryUI(StoryType.Complete) != null;
+    }
+
+    private bool ShouldPlayOutroStory(int level)
+    {
+        int finalLevel = GetFinalLevelIndex();
+        if (finalLevel <= 0 || level < finalLevel)
+        {
+            return false;
+        }
+
+        if (StoryManager.Instance == null)
+        {
+            return false;
+        }
+
+        if (StoryManager.Instance.IsStoryCompleted(StoryType.Outro))
+        {
+            return false;
+        }
+
+        return StoryManager.Instance.GetStoryUI(StoryType.Outro) != null;
+    }
+
+    private int GetFinalLevelIndex()
+    {
+        if (levelData != null && levelData.listPrefab != null && levelData.listPrefab.Count > 0)
+        {
+            return levelData.listPrefab.Count;
+        }
+
+        return 0;
     }
 
     private void FinishLevelIntroAndStartGameplay(int level)
