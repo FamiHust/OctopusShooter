@@ -315,9 +315,27 @@ public class SplineController : MonoBehaviour
         }
     }
 
+    public bool HasPendingRefills()
+    {
+        if (pendingRowsBySource == null || pendingRowsBySource.Count == 0)
+        {
+            return false;
+        }
+
+        foreach (var kvp in pendingRowsBySource)
+        {
+            if (kvp.Value != null && kvp.Value.Count > 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public bool IsAnyRefillInProgress()
     {
-        return processingRowIds.Count > 0 || processingSources.Count > 0;
+        return processingRowIds.Count > 0 || processingSources.Count > 0 || HasPendingRefills();
     }
 
     /// <summary>

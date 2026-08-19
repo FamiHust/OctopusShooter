@@ -1971,16 +1971,16 @@ public class BaseShooter : MonoBehaviour
             return;
         }
 
+        if (bulletCount <= 0)
+        {
+            HandleOutOfAmmo();
+            return;
+        }
+
         if (ShouldBlockShootingForMagicStoneClear())
         {
             targetObject = null;
             isDestroySequenceRequested = false;
-            return;
-        }
-
-        if (bulletCount <= 0)
-        {
-            HandleOutOfAmmo();
             return;
         }
 
@@ -2147,6 +2147,11 @@ public class BaseShooter : MonoBehaviour
                             route.OnRowDestroyed(destroyedRowGO);
                         }
                     });
+                }
+
+                if (bulletCount <= 0)
+                {
+                    HandleOutOfAmmo();
                 }
             });
 

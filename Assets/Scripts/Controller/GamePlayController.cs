@@ -968,13 +968,24 @@ public class GamePlayController : MonoBehaviour
         // Let shooters finish only the row they are already destroying before MagicStone snapshots rows.
         yield return WaitForShootersFinishCurrentRowsBeforeMagicStone();
 
+        // Check refill once more in case finishing shooter rows triggered a new refill
+        yield return WaitForRefillCompleteBeforeMagicPause();
+        if (gameEnded)
+        {
+            pendingMagicStoneClearRoutine = null;
+            SetMagicStoneClearInProgress(false);
+            yield break;
+        }
+
         SetAllRoutesMechanicPaused(true);
         routesPaused = true;
 
-        // Build target rows only after refill settled and routes are paused,
+        // Build target rows and shooter ammo consumer cache only after refill settled and routes are paused,
         // so newly refilled rows are included and no new movement starts mid-cast.
         yield return WaitForSettingPauseReleased();
         yield return WaitOneFrameForMagicStoneRowSnapshot();
+
+        BuildMagicStoneAmmoConsumerCache();
 
         yield return WaitForSettingPauseReleased();
         yield return PlayMagicStoneMainRouteWaveClearAnimation();
@@ -1072,15 +1083,11 @@ public class GamePlayController : MonoBehaviour
     private IEnumerator WaitForRefillCompleteBeforeMagicPause()
     {
         SplineController splineController = SplineController.Instance;
-        if (splineController == null)
-        {
-            yield break;
-        }
 
         float timeout = Mathf.Max(0f, magicStoneRefillWaitTimeout);
         float elapsed = 0f;
 
-        while (!gameEnded && splineController.IsAnyRefillInProgress())
+        while (!gameEnded && ((splineController != null && splineController.IsAnyRefillInProgress()) || SideRouteSeedExchangeMechanic.IsAnyExchangeInProgress))
         {
             if (isGamePausedBySettingPopup)
             {
@@ -1160,7 +1167,10 @@ public class GamePlayController : MonoBehaviour
             yield break;
         }
 
-        BuildMagicStoneAmmoConsumerCache();
+        if (!hasMagicStoneAmmoConsumerCache)
+        {
+            BuildMagicStoneAmmoConsumerCache();
+        }
 
         float introDuration = Mathf.Max(0.02f, magicStoneCastIntroDuration);
         float beamStartDelay = Mathf.Max(0f, magicStoneCastBeamStartDelay);
@@ -1427,7 +1437,10 @@ public class GamePlayController : MonoBehaviour
         int rowSeedCount = rowData.seedCount;
         Vector3 rowCoinSpawnPosition = rowSeeder.transform.position;
 
-        ConsumeAmmoByMagicStoneClear(rowData.color, rowSeedCount);
+        int consumedAmmo = ConsumeAmmoByMagicStoneClear(rowData.color, rowSeedCount);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log($"[MagicStone] Cleared row ({rowData.color}) with {rowSeedCount} seeds. Consumed ammo: {consumedAmmo}/{rowSeedCount}.");
+#endif
 
         for (int seedIndex = 0; seedIndex < rowData.seeds.Count; seedIndex++)
         {
@@ -2012,12 +2025,12 @@ public class GamePlayController : MonoBehaviour
         return cachedMagicStoneRewardCamera;
     }
 
-    private void ConsumeAmmoByMagicStoneClear(SeedColor targetColor, int amount)
+    private int ConsumeAmmoByMagicStoneClear(SeedColor targetColor, int amount)
     {
         int remaining = Mathf.Max(0, amount);
         if (remaining <= 0)
         {
-            return;
+            return 0;
         }
 
         if (!hasMagicStoneAmmoConsumerCache)
@@ -2025,17 +2038,27 @@ public class GamePlayController : MonoBehaviour
             BuildMagicStoneAmmoConsumerCache();
         }
 
-        remaining -= ConsumeAmmoFromCachedColorMap(magicStoneDeckShootersByColor, targetColor, remaining);
+        int totalConsumed = 0;
+        int consumedDeck = ConsumeAmmoFromCachedColorMap(magicStoneDeckShootersByColor, targetColor, remaining);
+        totalConsumed += consumedDeck;
+        remaining -= consumedDeck;
+
         if (remaining > 0)
         {
-            remaining -= ConsumeAmmoFromCachedColorMap(magicStoneOtherShootersByColor, targetColor, remaining);
+            int consumedOther = ConsumeAmmoFromCachedColorMap(magicStoneOtherShootersByColor, targetColor, remaining);
+            totalConsumed += consumedOther;
+            remaining -= consumedOther;
         }
 
         // Keep legacy scan as a safety net so runtime edge-cases still match prior behavior.
         if (remaining > 0)
         {
-            ConsumeAmmoByMagicStoneClearFallback(targetColor, remaining);
+            int consumedFallback = ConsumeAmmoByMagicStoneClearFallback(targetColor, remaining);
+            totalConsumed += consumedFallback;
+            remaining -= consumedFallback;
         }
+
+        return totalConsumed;
     }
 
     private void BuildMagicStoneAmmoConsumerCache()
@@ -2166,13 +2189,15 @@ public class GamePlayController : MonoBehaviour
         return consumedTotal;
     }
 
-    private void ConsumeAmmoByMagicStoneClearFallback(SeedColor targetColor, int amount)
+    private int ConsumeAmmoByMagicStoneClearFallback(SeedColor targetColor, int amount)
     {
         int remaining = Mathf.Max(0, amount);
         if (remaining <= 0)
         {
-            return;
+            return 0;
         }
+
+        int totalConsumed = 0;
 
         magicStoneDeckShooterBuffer.Clear();
         magicStoneDeckShooterSet.Clear();
@@ -2192,12 +2217,14 @@ public class GamePlayController : MonoBehaviour
                 magicStoneDeckShooterSet.Add(shooter);
             }
 
-            remaining -= ConsumeAmmoFromShooterList(magicStoneDeckShooterBuffer, remaining);
+            int consumedDeck = ConsumeAmmoFromShooterList(magicStoneDeckShooterBuffer, remaining);
+            totalConsumed += consumedDeck;
+            remaining -= consumedDeck;
         }
 
         if (remaining <= 0)
         {
-            return;
+            return totalConsumed;
         }
 
         magicStoneAllShooterBuffer.Clear();
@@ -2216,8 +2243,12 @@ public class GamePlayController : MonoBehaviour
                 continue;
             }
 
-            remaining -= shooter.ConsumeAmmoExternally(remaining);
+            int consumed = shooter.ConsumeAmmoExternally(remaining);
+            totalConsumed += consumed;
+            remaining -= consumed;
         }
+
+        return totalConsumed;
     }
 
     private static int ConsumeAmmoFromShooterList(List<BaseShooter> shooters, int amount)
